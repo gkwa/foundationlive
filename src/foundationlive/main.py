@@ -124,6 +124,7 @@ def main(args):
 
     timesheet = model.Timesheet(**external_data)
     print(lib.view_hours_worked_per_day(timesheet))
+    print(lib.view_hours_worked_per_day_summary(timesheet))
     _logger.info("Script ends here")
 
 

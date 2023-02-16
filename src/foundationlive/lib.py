@@ -2,6 +2,7 @@ import datetime
 import pathlib
 
 import durations
+import humanfriendly
 import humanize
 import jinja2
 import pkg_resources
@@ -45,9 +46,11 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
             seconds += duration.to_seconds()
             tasks.append(task)
 
+        delta = datetime.timedelta(seconds=seconds)
+
         x1 = {
             "date": entry.date,
-            "worked_time": datetime.timedelta(seconds=seconds),
+            "worked_time": humanfriendly.format_timespan(delta),
             "tasks": tasks,
         }
         stuff.append(x1)
@@ -55,4 +58,35 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
     template = env.get_template("view_hours_worked_per_day.j2")
     lst2 = sorted(stuff, key=lambda i: i["date"], reverse=True)
     out = template.render(data=lst2)
+    return out
+
+
+def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
+    daily_entries = []
+
+    total_seconds = 0
+    for entry in timesheet.days:
+        seconds = 0
+        for task in entry.tasks.__root__:
+            duration = durations.Duration(task.task_time)
+            seconds += duration.to_seconds()
+
+        total_seconds += seconds
+        delta = datetime.timedelta(seconds=seconds)
+
+        x1 = {
+            "date": entry.date,
+            "worked_time": delta,
+            "invoice_number": entry.invoice,
+        }
+        daily_entries.append(x1)
+
+    template = env.get_template("view_hours_worked_per_day_summary.j2")
+    daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
+    out = template.render(
+        data={
+            "summary": {"total_seconds_worked": total_seconds},
+            "entries": daily_entries,
+        }
+    )
     return out
