@@ -21,6 +21,7 @@ References:
 """
 
 import argparse
+import copy
 import logging
 import pathlib
 import sys
@@ -49,6 +50,13 @@ _logger = logging.getLogger(__name__)
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
+
+
+def check_positive(value):
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
+    return ivalue
 
 
 def parse_args(args):
@@ -86,7 +94,12 @@ def parse_args(args):
     parser.add_argument(
         "--data-path", default="data.json", required=True, help="path to data.json"
     )
-
+    parser.add_argument(
+        "--invoice",
+        type=check_positive,
+        required=False,
+        help="Filter out all entries that dont match invoice number",
+    )
     return parser.parse_args(args)
 
 
@@ -123,6 +136,16 @@ def main(args):
             print(exc)
 
     timesheet = model.Timesheet(**external_data)
+    timesheet2 = copy.deepcopy(timesheet)
+
+    if args.invoice is not None:
+        for day in timesheet.days:
+            if day.invoice != args.invoice:
+                timesheet2.days.remove(day)
+
+    timesheet = timesheet2
+
+    print(lib.view_hours_per_task(timesheet))
     print(lib.view_hours_worked_per_day(timesheet))
     print(lib.view_hours_worked_per_day_summary(timesheet))
     _logger.info("Script ends here")

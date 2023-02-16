@@ -15,7 +15,7 @@ loader = jinja2.FileSystemLoader(searchpath=templates_dir)
 env = jinja2.Environment(loader=loader, keep_trailing_newline=True)
 
 
-def view1(timesheet: model.Timesheet):
+def view_hours_per_task(timesheet: model.Timesheet):
     names = {}
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
@@ -65,19 +65,18 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
     daily_entries = []
 
     total_seconds = 0
-    for entry in timesheet.days:
+    for day in timesheet.days:
         seconds = 0
-        for task in entry.tasks.__root__:
-            duration = durations.Duration(task.task_time)
-            seconds += duration.to_seconds()
+        for task in day.tasks.__root__:
+            seconds += durations.Duration(task.task_time).to_seconds()
 
         total_seconds += seconds
         delta = datetime.timedelta(seconds=seconds)
 
         x1 = {
-            "date": entry.date,
-            "worked_time": delta,
-            "invoice_number": entry.invoice,
+            "date": day.date,
+            "worked_duration": delta,
+            "invoice_number": day.invoice,
         }
         daily_entries.append(x1)
 

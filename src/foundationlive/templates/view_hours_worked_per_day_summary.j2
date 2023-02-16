@@ -1,0 +1,4 @@
+{{ "%.2f"|format(data.summary.total_seconds_worked/3600) }}h
+{% for day in data.entries -%}
+{{ day.date.date() }} {{ day.worked_duration }}
+{% endfor -%}
