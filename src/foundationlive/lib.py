@@ -35,7 +35,24 @@ def view1(timesheet: model.Timesheet):
     return out
 
 
-def view2(timesheet: model.Timesheet):
+def view_hours_worked_per_day(timesheet: model.Timesheet):
+    stuff = []
     for entry in timesheet.days:
+        seconds = 0
+        tasks = []
         for task in entry.tasks.__root__:
-            print(entry)
+            duration = durations.Duration(task.task_time)
+            seconds += duration.to_seconds()
+            tasks.append(task)
+
+        x1 = {
+            "date": entry.date,
+            "worked_time": datetime.timedelta(seconds=seconds),
+            "tasks": tasks,
+        }
+        stuff.append(x1)
+
+    template = env.get_template("view_hours_worked_per_day.j2")
+    lst2 = sorted(stuff, key=lambda i: i["date"], reverse=True)
+    out = template.render(data=lst2)
+    return out

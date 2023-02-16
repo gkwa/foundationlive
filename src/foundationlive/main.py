@@ -21,10 +21,11 @@ References:
 """
 
 import argparse
-import json
 import logging
 import pathlib
 import sys
+
+import yaml
 
 from foundationlive import __version__, lib
 
@@ -115,11 +116,14 @@ def main(args):
     setup_logging(args.loglevel)
     _logger.debug("Starting crazy calculations...")
     records_path = pathlib.Path(args.data_path)
-    with open(records_path) as fh:
-        external_data = json.load(fh)
+    with open(records_path, "r") as stream:
+        try:
+            external_data = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
     timesheet = model.Timesheet(**external_data)
-    #    print(lib.view1(timesheet))
-    lib.view2(timesheet)
+    print(lib.view_hours_worked_per_day(timesheet))
     _logger.info("Script ends here")
 
 
