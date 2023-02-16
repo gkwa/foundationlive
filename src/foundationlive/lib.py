@@ -28,8 +28,14 @@ def view1(timesheet: model.Timesheet):
     for task, seconds in by_value:
         delta = datetime.timedelta(seconds=seconds)
         age = humanize.naturaldelta(delta)
-        stuff.append({age, task})
+        stuff.append({"duration": age, "name": task})
 
     template = env.get_template("view1.j2")
     out = template.render(data=stuff)
     return out
+
+
+def view2(timesheet: model.Timesheet):
+    for entry in timesheet.days:
+        for task in entry.tasks.__root__:
+            print(entry)

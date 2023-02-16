@@ -1,5 +1,7 @@
+import datetime
 import typing
 
+import dateutil.parser
 import pydantic
 
 
@@ -14,9 +16,14 @@ class TaskList(pydantic.BaseModel):
 
 class DailyEntry(pydantic.BaseModel):
     tasks: TaskList
-    date: str
+    date: datetime.datetime
     invoice: int
     invoice_year: int
+
+    @pydantic.validator("date", pre=True)
+    def parse_date_as_datetime_obj(cls, v):
+        dt = dateutil.parser.parse(v)
+        return dt
 
 
 class Timesheet(pydantic.BaseModel):

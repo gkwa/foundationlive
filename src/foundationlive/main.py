@@ -118,7 +118,8 @@ def main(args):
     with open(records_path) as fh:
         external_data = json.load(fh)
     timesheet = model.Timesheet(**external_data)
-    print(lib.view1(timesheet))
+    #    print(lib.view1(timesheet))
+    lib.view2(timesheet)
     _logger.info("Script ends here")
 
 
