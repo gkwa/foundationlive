@@ -21,10 +21,14 @@ References:
 """
 
 import argparse
+import json
 import logging
+import pathlib
 import sys
 
 from foundationlive import __version__, lib
+
+from . import model
 
 __author__ = "Taylor Monacelli"
 __copyright__ = "Taylor Monacelli"
@@ -110,7 +114,11 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting crazy calculations...")
-    lib.view1(args.data_path)
+    records_path = pathlib.Path(args.data_path)
+    with open(records_path) as fh:
+        external_data = json.load(fh)
+    timesheet = model.Timesheet(**external_data)
+    print(lib.view1(timesheet))
     _logger.info("Script ends here")
 
 

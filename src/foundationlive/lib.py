@@ -1,38 +1,35 @@
-import json
+import datetime
 import pathlib
 
 import durations
+import humanize
+import jinja2
+import pkg_resources
 
 from . import model
 
+package = __name__.split(".")[0]
+templates_dir = pathlib.Path(pkg_resources.resource_filename(package, "templates"))
+loader = jinja2.FileSystemLoader(searchpath=templates_dir)
+env = jinja2.Environment(loader=loader, keep_trailing_newline=True)
 
-def view1(data_path_json: pathlib.Path):
-    records_path = pathlib.Path(data_path_json)
 
-    with open(records_path) as fh:
-        external_data = json.load(fh)
-
-    timesheet = model.Timesheet(**external_data)
-
-    # for entry in timesheet.days:
-    #     for task in entry.tasks.__root__:
-    #         duration = durations.Duration(task.task_time)
-    #         seconds = duration.to_seconds()
-    #         p1 = '${0:.2f}'.format(seconds/60/60*40.87)
-    #         print(p1, task.task)
-
-    task_names = {}
+def view1(timesheet: model.Timesheet):
+    names = {}
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
-            task_names.setdefault(task.task, 0)
+            names.setdefault(task.task, 0)
             duration = durations.Duration(task.task_time)
-            task_names[task.task] += duration.to_seconds()
+            names[task.task] += duration.to_seconds()
 
-    task_names = sorted(task_names.items(), key=lambda x: x[1])
-    converted_dict = dict(task_names)
-    # print(converted_dict)
+    by_value = sorted(names.items(), key=lambda kv: kv[1])
 
-    for task, seconds in converted_dict.items():
-        r = seconds / 60 / 60 * 4087 / 100
-        p1 = "{:6.2f}".format(r)
-        print(p1, task)
+    stuff = []
+    for task, seconds in by_value:
+        delta = datetime.timedelta(seconds=seconds)
+        age = humanize.naturaldelta(delta)
+        stuff.append({age, task})
+
+    template = env.get_template("view1.j2")
+    out = template.render(data=stuff)
+    return out
