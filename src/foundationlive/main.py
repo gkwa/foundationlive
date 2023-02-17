@@ -95,10 +95,12 @@ def parse_args(args):
         "--data-path", default="data.json", required=True, help="path to data.json"
     )
     parser.add_argument(
+        "-i",
         "--invoice",
         type=check_positive,
         required=False,
-        help="Filter out all entries that dont match invoice number",
+        action="append",
+        help="Remove all task entries that don't match invoice these invoice numbers",
     )
     return parser.parse_args(args)
 
@@ -136,18 +138,17 @@ def main(args):
             print(exc)
 
     timesheet = model.Timesheet(**external_data)
-    timesheet2 = copy.deepcopy(timesheet)
+    timesheet_filtered = copy.deepcopy(timesheet)
 
-    if args.invoice is not None:
+    if args.invoice:
         for day in timesheet.days:
-            if day.invoice != args.invoice:
-                timesheet2.days.remove(day)
+            if day.invoice not in args.invoice:
+                timesheet_filtered.days.remove(day)
 
-    timesheet = timesheet2
-
-    print(lib.view_hours_per_task(timesheet))
-    print(lib.view_hours_worked_per_day(timesheet))
-    print(lib.view_hours_worked_per_day_summary(timesheet))
+    print(lib.view_hours_per_task(timesheet_filtered))
+    print(lib.view_hours_worked_per_day(timesheet_filtered))
+    print(lib.view_hours_worked_per_day_summary(timesheet_filtered))
+    print(lib.view_csv(timesheet_filtered))
     _logger.info("Script ends here")
 
 

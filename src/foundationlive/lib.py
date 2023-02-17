@@ -61,6 +61,26 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
     return out
 
 
+def view_csv(timesheet: model.Timesheet):
+    stuff = []
+    for entry in timesheet.days:
+        for task in entry.tasks.__root__:
+            duration = durations.Duration(task.task_time)
+
+            x1 = {
+                "task": task.task,
+                "date": entry.date,
+                "worked_time": duration.to_seconds() / 60 / 60,
+                "invoice": entry.invoice,
+            }
+            stuff.append(x1)
+
+    template = env.get_template("view_csv.j2")
+    tasks = sorted(stuff, key=lambda i: i["date"], reverse=True)
+    out = template.render(tasks=tasks)
+    return out
+
+
 def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
     daily_entries = []
 

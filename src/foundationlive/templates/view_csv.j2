@@ -1,0 +1,4 @@
+invoice	date	task	hours
+{% for task in tasks -%}
+{{ task.invoice }}	{{ task.date.date() }}	{{ task.task }}	{{ task.worked_time }}
+{% endfor -%}
