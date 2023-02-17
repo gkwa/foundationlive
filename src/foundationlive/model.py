@@ -18,7 +18,6 @@ class DailyEntry(pydantic.BaseModel):
     tasks: TaskList
     date: datetime.datetime
     invoice: int
-    invoice_year: int
 
     @pydantic.validator("date", pre=True)
     def parse_date_as_datetime_obj(cls, v):
