@@ -68,9 +68,10 @@ def view_csv(timesheet: model.Timesheet):
             duration = durations.Duration(task.task_time)
 
             x1 = {
-                "task": task.task,
+                "task": f"{task.task}",
                 "date": entry.date,
                 "worked_time": duration.to_seconds() / 60 / 60,
+                "worked_time_friendly": task.task_time,
                 "invoice": entry.invoice,
             }
             stuff.append(x1)

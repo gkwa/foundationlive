@@ -1,4 +1,4 @@
-invoice	date	task	hours
+invoice	date	task	hours	time friendly
 {% for task in tasks -%}
-{{ task.invoice }}	{{ task.date.date() }}	{{ task.task }}	{{ task.worked_time }}
+{{ task.invoice }}	{{ task.date.date() }}	{{ task.task }}	{{ task.worked_time }}	{{ task.worked_time_friendly }}
 {% endfor -%}
