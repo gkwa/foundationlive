@@ -14,6 +14,11 @@ templates_dir = pathlib.Path(pkg_resources.resource_filename(package, "templates
 loader = jinja2.FileSystemLoader(searchpath=templates_dir)
 env = jinja2.Environment(loader=loader, keep_trailing_newline=True)
 
+now = datetime.datetime.now()
+local_now = now.astimezone()
+local_tz = local_now.tzinfo
+local_tzname = local_tz.tzname(local_now)
+
 
 def view_hours_per_task(timesheet: model.Timesheet):
     names = {}
@@ -109,4 +114,26 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
             "entries": daily_entries,
         }
     )
+    return out
+
+
+def view_invoices(timesheet: model.Timesheet):
+    template = env.get_template("invoices.j2")
+    invoices = timesheet.invoices.__root__
+
+    lst = []
+    for invoice in invoices:
+        if invoice.submitted_on:
+            due = invoice.submitted_on + datetime.timedelta(days=30)
+            diff = local_now - due
+            x1 = {
+                "submitted_on": invoice.submitted_on,
+                "paid_already": invoice.paid_on is not None,
+                "number": invoice.number,
+                "diff": humanize.naturaldelta(diff),
+            }
+
+            lst.append(x1)
+
+    out = template.render(data=lst)
     return out

@@ -1,0 +1,3 @@
+invoice	submitted	paid	diff
+{% for invoice in data %}{{ invoice.number }}	{{ invoice.submitted_on.date() }}	{{ invoice.paid_already }}	{{ invoice.diff }}
+{% endfor -%}

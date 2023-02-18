@@ -149,6 +149,7 @@ def main(args):
     print(lib.view_hours_worked_per_day(timesheet_filtered))
     print(lib.view_hours_worked_per_day_summary(timesheet_filtered))
     print(lib.view_csv(timesheet_filtered))
+    print(lib.view_invoices(timesheet))
     _logger.info("Script ends here")
 
 

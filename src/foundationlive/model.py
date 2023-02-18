@@ -4,6 +4,29 @@ import typing
 import dateutil.parser
 import pydantic
 
+now = datetime.datetime.now()
+local_now = now.astimezone()
+local_tz = local_now.tzinfo
+
+
+class Invoice(pydantic.BaseModel):
+    number: int
+    submitted_on: typing.Optional[datetime.datetime] = None
+    paid_on: typing.Optional[datetime.datetime] = None
+
+    @pydantic.validator("submitted_on", pre=True, allow_reuse=True)
+    @pydantic.validator("paid_on", pre=True, allow_reuse=True)
+    def parse_date_as_datetime_obj(cls, v):
+        if not v:
+            return None
+
+        dt = dateutil.parser.parse(v).replace(tzinfo=local_tz)
+        return dt
+
+
+class InvoiceList(pydantic.BaseModel):
+    __root__: typing.List[Invoice]
+
 
 class Task(pydantic.BaseModel):
     task: str
@@ -32,4 +55,5 @@ class DailyEntry(pydantic.BaseModel):
 
 
 class Timesheet(pydantic.BaseModel):
+    invoices: InvoiceList
     days: typing.List[DailyEntry]
