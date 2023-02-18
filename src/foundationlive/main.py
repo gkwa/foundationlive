@@ -24,7 +24,6 @@ import argparse
 import copy
 import logging
 import pathlib
-import pprint
 import sys
 
 import yaml
@@ -145,8 +144,6 @@ def main(args):
         for day in timesheet.days:
             if day.invoice not in args.invoice:
                 timesheet_filtered.days.remove(day)
-
-    pprint.pprint(timesheet)
 
     print(lib.view_hours_per_task(timesheet_filtered))
     print(lib.view_hours_worked_per_day(timesheet_filtered))
