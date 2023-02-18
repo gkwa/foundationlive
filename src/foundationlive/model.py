@@ -3,6 +3,7 @@ import typing
 
 import dateutil.parser
 import pydantic
+import pydantic.dataclasses
 
 
 class Task(pydantic.BaseModel):
@@ -29,6 +30,10 @@ class DailyEntry(pydantic.BaseModel):
     def prevent_none(cls, v):
         assert v is not None, "total_time_sec may not be None"
         return v
+
+    @pydantic.dataclasses.dataclass
+    def __post_init__(self):
+        self.total_time_sec = [task.task_time for task in self.tasks]
 
 
 class Timesheet(pydantic.BaseModel):
