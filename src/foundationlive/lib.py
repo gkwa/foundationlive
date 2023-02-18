@@ -146,7 +146,7 @@ def view_invoices(timesheet: model.Timesheet):
             ts = local_now - delta
             due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
 
-        x1 = {
+        display = {
             "submitted": invoice.submitted_on is not None,
             "submitted_on": submitted_on,
             "paid_already": invoice.paid_on is not None,
@@ -155,12 +155,12 @@ def view_invoices(timesheet: model.Timesheet):
         }
 
         if not invoice.submitted_on:
-            x1["paid_already"] = " "
+            display["paid_already"] = " "
 
         if invoice.paid_on:
-            x1["paid_already"] = invoice.paid_on.strftime("%m-%d")
+            display["paid_already"] = invoice.paid_on.date()
 
-        display_dicts.append(x1)
+        display_dicts.append(display)
 
     out = template.render(data=display_dicts)
     return out
