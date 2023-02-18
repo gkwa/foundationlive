@@ -126,7 +126,7 @@ def view_invoices(timesheet: model.Timesheet):
     template = env.get_template("invoices.j2")
     invoices = timesheet.invoices.__root__
 
-    lst = []
+    display_dicts = []
     for invoice in invoices:
         if invoice.submitted_on is None:
             due_date = "N/A"
@@ -157,7 +157,10 @@ def view_invoices(timesheet: model.Timesheet):
         if not invoice.submitted_on:
             x1["paid_already"] = " "
 
-        lst.append(x1)
+        if invoice.paid_on:
+            x1["paid_already"] = invoice.paid_on.strftime("%m-%d")
 
-    out = template.render(data=lst)
+        display_dicts.append(x1)
+
+    out = template.render(data=display_dicts)
     return out
