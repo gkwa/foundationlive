@@ -124,13 +124,12 @@ def view_invoices(timesheet: model.Timesheet):
     lst = []
     for invoice in invoices:
         if invoice.submitted_on:
-            due = invoice.submitted_on + datetime.timedelta(days=30)
-            diff = local_now - due
+            due_date = invoice.submitted_on + datetime.timedelta(days=30)
             x1 = {
                 "submitted_on": invoice.submitted_on,
                 "paid_already": invoice.paid_on is not None,
                 "number": invoice.number,
-                "diff": humanize.naturaldelta(diff),
+                "due_date_relative": humanize.naturaldelta(local_now - due_date),
             }
 
             lst.append(x1)
