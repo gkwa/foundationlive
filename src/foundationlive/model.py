@@ -1,12 +1,23 @@
 import datetime
+import logging
 import typing
 
 import dateutil.parser
 import pydantic
 
+_logger = logging.getLogger(__name__)
+
 now = datetime.datetime.now()
 local_now = now.astimezone()
 local_tz = local_now.tzinfo
+
+
+def date_str_to_datetime(date: str) -> datetime.datetime:
+    if not date:
+        return None
+
+    dt = dateutil.parser.parse(date).replace(tzinfo=local_tz)
+    return dt
 
 
 class Invoice(pydantic.BaseModel):
@@ -14,14 +25,15 @@ class Invoice(pydantic.BaseModel):
     submitted_on: typing.Optional[datetime.datetime] = None
     paid_on: typing.Optional[datetime.datetime] = None
 
-    @pydantic.validator("submitted_on", pre=True, allow_reuse=True)
-    @pydantic.validator("paid_on", pre=True, allow_reuse=True)
-    def parse_date_as_datetime_obj(cls, v):
-        if not v:
-            return None
+    # validators
+    # https://docs.pydantic.dev/usage/validators/#reuse-validators
+    _normalize_submitted_on = pydantic.validator(
+        "submitted_on", pre=True, allow_reuse=True
+    )(date_str_to_datetime)
 
-        dt = dateutil.parser.parse(v).replace(tzinfo=local_tz)
-        return dt
+    _normalize_paid_on = pydantic.validator("paid_on", pre=True, allow_reuse=True)(
+        date_str_to_datetime
+    )
 
 
 class InvoiceList(pydantic.BaseModel):
@@ -43,10 +55,9 @@ class DailyEntry(pydantic.BaseModel):
     invoice: int
     total_time_sec: typing.Optional[int] = None
 
-    @pydantic.validator("date", pre=True)
-    def parse_date_as_datetime_obj(cls, v):
-        dt = dateutil.parser.parse(v)
-        return dt
+    _normalize_date = pydantic.validator("date", pre=True, allow_reuse=True)(
+        date_str_to_datetime
+    )
 
     @pydantic.validator("total_time_sec")
     def prevent_none(cls, v):

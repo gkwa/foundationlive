@@ -1,3 +1,3 @@
-invoice	paid	submitted	due in
-{% for invoice in data %}{{ invoice.number }}	{{ invoice.paid_already }}	{{ invoice.submitted_on.date() }}	{{ invoice.due_date_relative }}
+invoice	paid	submitted	due for payment
+{% for invoice in data %}{{ invoice.number }}	{{ invoice.paid_already }}	{{ invoice.submitted_on }}	{{ invoice.due_date_relative }}
 {% endfor -%}

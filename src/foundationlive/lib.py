@@ -1,4 +1,5 @@
 import datetime
+import logging
 import pathlib
 
 import durations
@@ -6,8 +7,11 @@ import humanfriendly
 import humanize
 import jinja2
 import pkg_resources
+import timeago
 
 from . import model
+
+_logger = logging.getLogger(__name__)
 
 package = __name__.split(".")[0]
 templates_dir = pathlib.Path(pkg_resources.resource_filename(package, "templates"))
@@ -18,6 +22,7 @@ now = datetime.datetime.now()
 local_now = now.astimezone()
 local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
+net30 = datetime.timedelta(days=30)
 
 
 def view_hours_per_task(timesheet: model.Timesheet):
@@ -123,16 +128,36 @@ def view_invoices(timesheet: model.Timesheet):
 
     lst = []
     for invoice in invoices:
-        if invoice.submitted_on:
-            due_date = invoice.submitted_on + datetime.timedelta(days=30)
-            x1 = {
-                "submitted_on": invoice.submitted_on,
-                "paid_already": invoice.paid_on is not None,
-                "number": invoice.number,
-                "due_date_relative": humanize.naturaldelta(local_now - due_date),
-            }
+        if invoice.submitted_on is None:
+            due_date = "N/A"
+            due_date_relative = " "
+            submitted_on = " "
+        else:
+            due_date = invoice.submitted_on + net30
+            delta = local_now - due_date
+            due_date_relative = timeago.format(delta)
+            submitted_on = invoice.submitted_on.date()
+            ts = invoice.submitted_on + net30
+            due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
 
-            lst.append(x1)
+        if invoice.paid_on:
+            delta = local_now - invoice.paid_on
+            due_date_relative = timeago.format(delta)
+            ts = local_now - delta
+            due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
+
+        x1 = {
+            "submitted": invoice.submitted_on is not None,
+            "submitted_on": submitted_on,
+            "paid_already": invoice.paid_on is not None,
+            "number": invoice.number,
+            "due_date_relative": due_date_relative,
+        }
+
+        if not invoice.submitted_on:
+            x1["paid_already"] = " "
+
+        lst.append(x1)
 
     out = template.render(data=lst)
     return out
