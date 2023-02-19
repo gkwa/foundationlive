@@ -1,4 +1,4 @@
-invoice	date	task	duration hours	duration friendly	total per invoice
+invoice	date	task	duration hours	duration friendly	inv total decimal	inv total friendly
 {% for task in tasks -%}
-{{ task.invoice }}	{{ task.date.date() }}	{{ task.task }}	{{ task.worked_time }}	{{ task.worked_time_friendly }}	{{ task.worked_time_cumulative }}
+{{ task.invoice }}	{{ task.date.date() }}	{{ task.task }}	{{ task.worked_time }}	{{ task.worked_time_friendly }}	{{ task.worked_time_cumulative_frac }}	{{ task.worked_time_cumulative }}
 {% endfor -%}

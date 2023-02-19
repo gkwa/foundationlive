@@ -120,6 +120,7 @@ def view_csv(timesheet: model.Timesheet):
         total_per_invoice += duration.to_seconds()
         delta = datetime.timedelta(seconds=total_per_invoice)
         task["worked_time_cumulative"] = timedelta_to_short_string(delta)
+        task["worked_time_cumulative_frac"] = total_per_invoice / 3600
 
     out = template.render(tasks=tasks)
     return out
