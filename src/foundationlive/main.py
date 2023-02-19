@@ -31,6 +31,7 @@ import yaml
 from foundationlive import __version__, lib
 
 from . import model
+from . import writer as writermod
 
 __author__ = "Taylor Monacelli"
 __copyright__ = "Taylor Monacelli"
@@ -142,14 +143,30 @@ def main(args):
 
     if args.invoice:
         for day in timesheet.days:
+
             if day.invoice not in args.invoice:
                 timesheet_filtered.days.remove(day)
 
-    print(lib.view_hours_per_task(timesheet_filtered))
-    print(lib.view_hours_worked_per_day(timesheet_filtered))
-    print(lib.view_hours_worked_per_day_summary(timesheet_filtered))
-    print(lib.view_csv(timesheet_filtered))
-    print(lib.view_invoices(timesheet))
+    writermod.FileWriter("view_hours_per_task.txt").write(
+        lib.view_hours_per_task(timesheet_filtered)
+    )
+    writermod.FileWriter("view_hours_worked_per_day.txt").write(
+        lib.view_hours_worked_per_day(timesheet_filtered)
+    )
+    writermod.FileWriter("view_hours_worked_per_day_summary.txt").write(
+        lib.view_hours_worked_per_day_summary(timesheet_filtered)
+    )
+    writermod.FileWriter("view_csv.txt").write(lib.view_csv(timesheet_filtered))
+    writermod.FileWriter("view_invoices.txt").write(lib.view_invoices(timesheet))
+
+    writermod.ConsoleWriter().write(lib.view_hours_per_task(timesheet_filtered))
+    writermod.ConsoleWriter().write(lib.view_hours_worked_per_day(timesheet_filtered))
+    writermod.ConsoleWriter().write(
+        lib.view_hours_worked_per_day_summary(timesheet_filtered)
+    )
+    writermod.ConsoleWriter().write(lib.view_csv(timesheet_filtered))
+    writermod.ConsoleWriter().write(lib.view_invoices(timesheet))
+
     _logger.info("Script ends here")
 
 
