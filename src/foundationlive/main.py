@@ -161,6 +161,7 @@ def main(args):
             timesheet_filtered,
         ),
         lib.Thingy("view_csv.txt", lib.view_csv, timesheet_filtered),
+        # want timesheet for view_invoices instead of timesheet_filtered
         lib.Thingy("view_invoices.txt", lib.view_invoices, timesheet),
     ]
 
