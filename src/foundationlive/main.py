@@ -143,29 +143,43 @@ def main(args):
 
     if args.invoice:
         for day in timesheet.days:
-
             if day.invoice not in args.invoice:
                 timesheet_filtered.days.remove(day)
 
-    writermod.FileWriter("view_hours_per_task.txt").write(
-        lib.view_hours_per_task(timesheet_filtered)
-    )
-    writermod.FileWriter("view_hours_worked_per_day.txt").write(
-        lib.view_hours_worked_per_day(timesheet_filtered)
-    )
-    writermod.FileWriter("view_hours_worked_per_day_summary.txt").write(
-        lib.view_hours_worked_per_day_summary(timesheet_filtered)
-    )
-    writermod.FileWriter("view_csv.txt").write(lib.view_csv(timesheet_filtered))
-    writermod.FileWriter("view_invoices.txt").write(lib.view_invoices(timesheet))
+    outputs = [
+        {
+            "fname": "view_hours_per_task.txt",
+            "fcn": lib.view_hours_per_task,
+            "data": timesheet_filtered,
+        },
+        {
+            "fname": "view_hours_worked_per_day.txt",
+            "fcn": lib.view_hours_worked_per_day,
+            "data": timesheet_filtered,
+        },
+        {
+            "fname": "view_hours_worked_per_day_summary.txt",
+            "fcn": lib.view_hours_worked_per_day_summary,
+            "data": timesheet_filtered,
+        },
+        {
+            "fname": "view_csv.txt",
+            "fcn": lib.view_csv,
+            "data": timesheet_filtered,
+        },
+        {
+            "fname": "view_invoices.txt",
+            "fcn": lib.view_invoices,
+            "data": timesheet,  # no filtering for invoices, thank you
+        },
+    ]
 
-    writermod.ConsoleWriter().write(lib.view_hours_per_task(timesheet_filtered))
-    writermod.ConsoleWriter().write(lib.view_hours_worked_per_day(timesheet_filtered))
-    writermod.ConsoleWriter().write(
-        lib.view_hours_worked_per_day_summary(timesheet_filtered)
-    )
-    writermod.ConsoleWriter().write(lib.view_csv(timesheet_filtered))
-    writermod.ConsoleWriter().write(lib.view_invoices(timesheet))
+    for item in outputs:
+        fcn = item["fcn"]
+        fname = item["fname"]
+        data = item["data"]
+        writermod.FileWriter(fname).write(fcn(data))
+        writermod.ConsoleWriter().write(fcn(data))
 
     _logger.info("Script ends here")
 
