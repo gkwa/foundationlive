@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import logging
 import pathlib
@@ -23,6 +24,13 @@ local_now = now.astimezone()
 local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
 net30 = datetime.timedelta(days=30)
+
+
+@dataclasses.dataclass
+class Thingy:
+    fname: str
+    fn: str
+    data: dict
 
 
 def view_hours_per_task(timesheet: model.Timesheet):

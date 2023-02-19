@@ -147,39 +147,27 @@ def main(args):
                 timesheet_filtered.days.remove(day)
 
     outputs = [
-        {
-            "fname": "view_hours_per_task.txt",
-            "fcn": lib.view_hours_per_task,
-            "data": timesheet_filtered,
-        },
-        {
-            "fname": "view_hours_worked_per_day.txt",
-            "fcn": lib.view_hours_worked_per_day,
-            "data": timesheet_filtered,
-        },
-        {
-            "fname": "view_hours_worked_per_day_summary.txt",
-            "fcn": lib.view_hours_worked_per_day_summary,
-            "data": timesheet_filtered,
-        },
-        {
-            "fname": "view_csv.txt",
-            "fcn": lib.view_csv,
-            "data": timesheet_filtered,
-        },
-        {
-            "fname": "view_invoices.txt",
-            "fcn": lib.view_invoices,
-            "data": timesheet,  # no filtering for invoices, thank you
-        },
+        lib.Thingy(
+            "view_hours_per_task.txt", lib.view_hours_per_task, timesheet_filtered
+        ),
+        lib.Thingy(
+            "view_hours_worked_per_day.txt",
+            lib.view_hours_worked_per_day,
+            timesheet_filtered,
+        ),
+        lib.Thingy(
+            "view_hours_worked_per_day_summary.txt",
+            lib.view_hours_worked_per_day_summary,
+            timesheet_filtered,
+        ),
+        lib.Thingy("view_csv.txt", lib.view_csv, timesheet_filtered),
+        lib.Thingy("view_invoices.txt", lib.view_invoices, timesheet),
     ]
 
-    for item in outputs:
-        fcn = item["fcn"]
-        fname = item["fname"]
-        data = item["data"]
-        writermod.FileWriter(fname).write(fcn(data))
-        writermod.ConsoleWriter().write(fcn(data))
+    for thing in outputs:
+        out = thing.fn(thing.data)
+        writermod.FileWriter(thing.fname).write(out)
+        writermod.ConsoleWriter().write(out)
 
     _logger.info("Script ends here")
 
