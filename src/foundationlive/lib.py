@@ -4,8 +4,6 @@ import logging
 import pathlib
 
 import durations
-import humanfriendly
-import humanize
 import jinja2
 import pkg_resources
 import timeago
@@ -46,8 +44,8 @@ def view_hours_per_task(timesheet: model.Timesheet):
     stuff = []
     for task, seconds in by_value:
         delta = datetime.timedelta(seconds=seconds)
-        age = humanize.naturaldelta(delta)
-        stuff.append({"duration": age, "name": task})
+        duration = timedelta_to_short_string(delta)
+        stuff.append({"duration": duration, "name": task})
 
     template = env.get_template("view1.j2")
     out = template.render(data=stuff)
@@ -68,14 +66,14 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
 
         x1 = {
             "date": entry.date,
-            "worked_time": humanfriendly.format_timespan(delta),
+            "worked_time": timedelta_to_short_string(delta),
             "tasks": tasks,
         }
         stuff.append(x1)
 
     template = env.get_template("view_hours_worked_per_day.j2")
-    lst2 = sorted(stuff, key=lambda i: i["date"], reverse=True)
-    out = template.render(data=lst2)
+    stuff = sorted(stuff, key=lambda i: i["date"], reverse=True)
+    out = template.render(data=stuff)
     return out
 
 
