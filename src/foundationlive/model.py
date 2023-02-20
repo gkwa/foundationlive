@@ -42,6 +42,7 @@ class InvoiceList(pydantic.BaseModel):
 
 class Task(pydantic.BaseModel):
     task: str
+    minutia: typing.Optional[str] = ""
     task_time: str
 
 

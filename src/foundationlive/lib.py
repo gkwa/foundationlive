@@ -2,6 +2,7 @@ import dataclasses
 import datetime
 import logging
 import pathlib
+import textwrap
 
 import durations
 import jinja2
@@ -54,13 +55,27 @@ def view_hours_per_task(timesheet: model.Timesheet):
 
 def view_hours_worked_per_day(timesheet: model.Timesheet):
     stuff = []
+
     for entry in timesheet.days:
         seconds = 0
         tasks = []
         for task in entry.tasks.__root__:
             duration = durations.Duration(task.task_time)
             seconds += duration.to_seconds()
-            tasks.append(task)
+
+            minutia = task.minutia
+            minutia = " ".join(minutia.strip().split()).strip()
+            minutia = textwrap.fill(
+                minutia, initial_indent="   ", subsequent_indent="   "
+            )
+
+            modified_task = {
+                "task": task.task,
+                "minutia": minutia,
+                "task_time": task.task_time,
+            }
+
+            tasks.append(modified_task)
 
         delta = datetime.timedelta(seconds=seconds)
 
@@ -155,7 +170,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
 
 def view_invoices(timesheet: model.Timesheet):
-    template = env.get_template("invoices.j2")
+    template = env.get_template("view_invoices.j2")
     invoices = timesheet.invoices.__root__
 
     display_dicts = []
