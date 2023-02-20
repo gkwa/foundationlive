@@ -57,14 +57,13 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
     stuff = []
 
     for entry in timesheet.days:
-        seconds = 0
-        tasks = []
+        seconds, tasks = 0, []
         for task in entry.tasks.__root__:
             duration = durations.Duration(task.task_time)
             seconds += duration.to_seconds()
 
             minutia = task.minutia
-            minutia = " ".join(minutia.strip().split()).strip()
+            minutia = " ".join(minutia.strip().split())
             minutia = textwrap.fill(
                 minutia, initial_indent="   ", subsequent_indent="   "
             )
