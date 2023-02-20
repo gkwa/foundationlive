@@ -1,0 +1,3 @@
+{% for item in data -%}
+{{ "%8s"|format(item.duration) }} - {{ item.name }}
+{% endfor %}

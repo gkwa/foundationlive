@@ -21,7 +21,7 @@ now = datetime.datetime.now()
 local_now = now.astimezone()
 local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
-net30 = datetime.timedelta(days=30)
+delta_net30 = datetime.timedelta(days=30)
 
 
 @dataclasses.dataclass
@@ -47,7 +47,7 @@ def view_hours_per_task(timesheet: model.Timesheet):
         duration = timedelta_to_short_string(delta)
         stuff.append({"duration": duration, "name": task})
 
-    template = env.get_template("view1.j2")
+    template = env.get_template("view_hours_worked_per_task.j2")
     out = template.render(data=stuff)
     return out
 
@@ -165,11 +165,11 @@ def view_invoices(timesheet: model.Timesheet):
             due_date_relative = " "
             submitted_on = " "
         else:
-            due_date = invoice.submitted_on + net30
+            due_date = invoice.submitted_on + delta_net30
             delta = local_now - due_date
             due_date_relative = timeago.format(delta)
             submitted_on = invoice.submitted_on.date()
-            ts = invoice.submitted_on + net30
+            ts = invoice.submitted_on + delta_net30
             due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
 
         if invoice.paid_on:
