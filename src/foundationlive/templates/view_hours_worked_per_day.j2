@@ -1,5 +1,5 @@
 {% for day in data %}
-{{ day.date.strftime("%A") }} {{ day.date.date() }} {{ day.worked_time }}
+{{ day.date.strftime("%A") }} {{ day.date.date() }} - {{ day.worked_time }}
 {% for task in day.tasks %} {{ task.task }} - {{ task.task_time }}{% if task.minutia %}
 {{ task.minutia }}{% endif %}
 {% endfor -%}

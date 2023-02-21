@@ -1,6 +1,7 @@
 import dataclasses
 import datetime
 import logging
+import os
 import pathlib
 import textwrap
 
@@ -66,8 +67,8 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
             minutia = " ".join(minutia.strip().split())
             minutia = textwrap.fill(
                 minutia,
-                initial_indent="   ",
-                subsequent_indent="   ",
+                initial_indent=" " * 3,
+                subsequent_indent=" " * 3,
                 break_long_words=False,
             )
 
@@ -91,6 +92,37 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
     template = env.get_template("view_hours_worked_per_day.j2")
     stuff = sorted(stuff, key=lambda i: i["date"], reverse=True)
     out = template.render(data=stuff)
+    return out
+
+
+def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
+    daily_entries = []
+
+    total_seconds = 0
+    wage_per_hour = float(os.environ.get("WAGE", 0))
+    for day in timesheet.days:
+        seconds = 0
+        for task in day.tasks.__root__:
+            seconds += durations.Duration(task.task_time).to_seconds()
+
+        total_seconds += seconds
+        delta = datetime.timedelta(seconds=seconds)
+        x1 = {
+            "date": day.date,
+            "worked_duration": timedelta_to_short_string(delta),
+            "invoice_number": day.invoice,
+            "earned": wage_per_hour * delta.seconds / 3600,
+        }
+        daily_entries.append(x1)
+
+    template = env.get_template("view_hours_worked_per_day_summary.j2")
+    daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
+    out = template.render(
+        data={
+            "summary": {"total_seconds_worked": total_seconds},
+            "entries": daily_entries,
+        }
+    )
     return out
 
 
@@ -144,36 +176,6 @@ def view_csv(timesheet: model.Timesheet):
         task["worked_time_cumulative_frac"] = total_per_invoice / 3600
 
     out = template.render(tasks=tasks)
-    return out
-
-
-def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
-    daily_entries = []
-
-    total_seconds = 0
-    for day in timesheet.days:
-        seconds = 0
-        for task in day.tasks.__root__:
-            seconds += durations.Duration(task.task_time).to_seconds()
-
-        total_seconds += seconds
-        delta = datetime.timedelta(seconds=seconds)
-
-        x1 = {
-            "date": day.date,
-            "worked_duration": delta,
-            "invoice_number": day.invoice,
-        }
-        daily_entries.append(x1)
-
-    template = env.get_template("view_hours_worked_per_day_summary.j2")
-    daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
-    out = template.render(
-        data={
-            "summary": {"total_seconds_worked": total_seconds},
-            "entries": daily_entries,
-        }
-    )
     return out
 
 
