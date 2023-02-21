@@ -110,12 +110,18 @@ def view_csv(timesheet: model.Timesheet):
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
             duration = durations.Duration(task.task_time)
+
+            minutia = task.minutia
+            minutia = " ".join(minutia.strip().split())
+            minutia = textwrap.fill(minutia, width=999_999_999)
+
             x1 = {
                 "task": task.task,
                 "date": entry.date,
                 "worked_time": duration.to_seconds() / 60 / 60,
                 "worked_time_friendly": task.task_time,
                 "invoice": entry.invoice,
+                "minutia": minutia,
             }
             stuff.append(x1)
 
