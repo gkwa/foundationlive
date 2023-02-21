@@ -65,7 +65,10 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
             minutia = task.minutia
             minutia = " ".join(minutia.strip().split())
             minutia = textwrap.fill(
-                minutia, initial_indent="   ", subsequent_indent="   "
+                minutia,
+                initial_indent="   ",
+                subsequent_indent="   ",
+                break_long_words=False,
             )
 
             modified_task = {
