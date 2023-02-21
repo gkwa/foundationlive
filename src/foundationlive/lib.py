@@ -1,3 +1,4 @@
+import calendar
 import dataclasses
 import datetime
 import logging
@@ -183,12 +184,20 @@ def view_invoices(timesheet: model.Timesheet):
     template = env.get_template("view_invoices.j2")
     invoices = timesheet.invoices.__root__
 
+    today = datetime.datetime.today()
+
+    _, days_in_this_month = calendar.monthrange(today.year, today.month)
+    month_last_day = datetime.datetime(today.year, today.month, days_in_this_month)
+    month_middle = datetime.datetime(today.year, today.month, 15)
+    submittal_due_date = month_last_day if today < month_middle else month_last_day
+    submittal_due_from_now_delta = submittal_due_date - today
+
     display_dicts = []
     for invoice in invoices:
         if invoice.submitted_on is None:
             due_date = "N/A"
             due_date_relative = " "
-            submitted_on = " "
+            submitted_on = None
         else:
             due_date = invoice.submitted_on + delta_net30
             delta = local_now - due_date
@@ -206,6 +215,8 @@ def view_invoices(timesheet: model.Timesheet):
         display = {
             "submitted": invoice.submitted_on is not None,
             "submitted_on": submitted_on,
+            "submittal_due_from_now_delta": submittal_due_from_now_delta,
+            "submittal_due_date": submittal_due_date,
             "paid_already": invoice.paid_on is not None,
             "number": invoice.number,
             "due_date_relative": due_date_relative,
