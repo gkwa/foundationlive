@@ -1,4 +1,4 @@
 {% for day in data.entries -%}
-{{ day.invoice_number }} {{ day.date.date() }} {{ "%5s"|format(day.worked_duration) }} {% if day.earned > 1.0 %}${{ "%7.2f"|format(day.earned) }}{% endif %}
+{{ day.invoice_number }} {{ day.date.date() }} {{ "%5s"|format(day.worked_duration) }} {% if day.earned > 1.0 %}{{ "%7.2f"|format(day.earned) }}{% endif %}
 {% endfor -%}
 {{ "%.2f"|format(data.summary.total_seconds_worked/3600) }}h

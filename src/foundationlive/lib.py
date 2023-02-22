@@ -112,7 +112,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
             "date": day.date,
             "worked_duration": timedelta_to_short_string(delta),
             "invoice_number": day.invoice,
-            "earned": wage_per_hour * delta.seconds / 3600,
+            "earned": wage_per_hour * delta.seconds / 60 / 60,
         }
         daily_entries.append(x1)
 
@@ -174,7 +174,7 @@ def view_csv(timesheet: model.Timesheet):
         total_per_invoice += duration.to_seconds()
         delta = datetime.timedelta(seconds=total_per_invoice)
         task["worked_time_cumulative"] = timedelta_to_short_string(delta)
-        task["worked_time_cumulative_frac"] = total_per_invoice / 3600
+        task["worked_time_cumulative_frac"] = total_per_invoice / 60 / 60
 
     out = template.render(tasks=tasks)
     return out
@@ -204,13 +204,13 @@ def view_invoices(timesheet: model.Timesheet):
             due_date_relative = timeago.format(delta)
             submitted_on = invoice.submitted_on.date()
             ts = invoice.submitted_on + delta_net30
-            due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
+            due_date_relative = f"{due_date_relative} on {ts.strftime('%m-%d')}"
 
         if invoice.paid_on:
             delta = local_now - invoice.paid_on
             due_date_relative = timeago.format(delta)
             ts = local_now - delta
-            due_date_relative = f"{due_date_relative} ({ts.strftime('%m-%d')})"
+            due_date_relative = f"{due_date_relative} on {ts.strftime('%m-%d')}"
 
         display = {
             "submitted": invoice.submitted_on is not None,
