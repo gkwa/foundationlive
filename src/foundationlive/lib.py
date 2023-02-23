@@ -196,21 +196,25 @@ def view_invoices(timesheet: model.Timesheet):
     for invoice in invoices:
         if invoice.submitted_on is None:
             due_date = "N/A"
-            due_date_relative = " "
+            payout_due_date_relative = " "
             submitted_on = None
         else:
             due_date = invoice.submitted_on + delta_net30
-            delta = local_now - due_date
-            due_date_relative = timeago.format(delta)
+            delta = due_date - local_now
+            payout_due_date_relative = delta.days
             submitted_on = invoice.submitted_on.date()
             ts = invoice.submitted_on + delta_net30
-            due_date_relative = f"{due_date_relative} on {ts.strftime('%m-%d')}"
+            payout_due_date_relative = (
+                f"{payout_due_date_relative} days on {ts.strftime('%m-%d')}"
+            )
 
         if invoice.paid_on:
             delta = local_now - invoice.paid_on
-            due_date_relative = timeago.format(delta)
+            payout_due_date_relative = timeago.format(delta)
             ts = local_now - delta
-            due_date_relative = f"{due_date_relative} on {ts.strftime('%m-%d')}"
+            payout_due_date_relative = (
+                f"{payout_due_date_relative} on {ts.strftime('%m-%d')}"
+            )
 
         display = {
             "submitted": invoice.submitted_on is not None,
@@ -219,7 +223,7 @@ def view_invoices(timesheet: model.Timesheet):
             "submittal_due_date": submittal_due_date,
             "paid_already": invoice.paid_on is not None,
             "number": invoice.number,
-            "due_date_relative": due_date_relative,
+            "payout_due_date_relative": payout_due_date_relative,
         }
 
         if not invoice.submitted_on:
