@@ -1,7 +1,7 @@
 {% for invoice in data %}
 invoice:               {{ invoice.number }}
 paid:                  {{ invoice.paid_already }}
-submitted:             {{ invoice.submitted_on }}
+submitted:             {{ invoice.submitted_on or '' }}
 payout due date:       {{ invoice.due_date_relative }}
 inv submittal due in:  {% if invoice.submitted_on %}N/A{% else %}{{ invoice.submittal_due_from_now_delta.days }} days on {{ invoice.submittal_due_date.strftime("%m-%d") }}{% endif %}
 {% endfor -%}
