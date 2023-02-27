@@ -208,7 +208,9 @@ def view_invoices(timesheet: model.Timesheet):
     month_last_day = datetime.datetime(today.year, today.month, days_in_this_month)
     month_middle = datetime.datetime(today.year, today.month, 15)
     submittal_due_date = month_last_day if today < month_middle else month_last_day
-    submittal_due_from_now_delta = submittal_due_date - today
+    submittal_due_from_now_delta = (
+        submittal_due_date - today + datetime.timedelta(days=1)
+    )
 
     display_dicts = []
     for invoice in invoices:
