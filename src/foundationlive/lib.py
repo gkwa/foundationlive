@@ -36,22 +36,40 @@ class Thingy:
 
 def view_hours_per_task(timesheet: model.Timesheet):
     names = {}
+    invoices = set()
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
             names.setdefault(task.task, 0)
             duration = durations.Duration(task.task_time)
             names[task.task] += duration.to_seconds()
+            invoices.add(entry.invoice)
 
     by_value = sorted(names.items(), key=lambda kv: kv[1])
 
     stuff = []
+    total_time = datetime.timedelta(seconds=0)
     for task, seconds in by_value:
         delta = datetime.timedelta(seconds=seconds)
-        duration = timedelta_to_short_string(delta)
-        stuff.append({"duration": duration, "name": task})
+        stuff.append(
+            {"duration_friendly": timedelta_to_short_string(delta), "name": task}
+        )
+        total_time += delta
+
+    total_label = (
+        f"total for invoices {', '.join([str(x) for x in invoices])}"
+        if len(invoices) > 1
+        else f"total for invoice {str(invoices.pop())}"
+    )
 
     template = env.get_template("view_hours_worked_per_task.j2")
-    out = template.render(data=stuff)
+    out = template.render(
+        data={
+            "invoices": invoices,
+            "stuff": stuff,
+            "total_time": timedelta_to_short_string(total_time),
+            "total_label": total_label,
+        }
+    )
     return out
 
 
