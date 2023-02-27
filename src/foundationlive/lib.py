@@ -201,6 +201,7 @@ def view_csv(timesheet: model.Timesheet):
 def view_invoices(timesheet: model.Timesheet):
     template = env.get_template("view_invoices.j2")
     invoices = timesheet.invoices.__root__
+    invoices_by_inv_number = sorted(invoices, key=lambda x: x.number, reverse=False)
 
     today = datetime.datetime.today()
 
@@ -213,7 +214,7 @@ def view_invoices(timesheet: model.Timesheet):
     )
 
     display_dicts = []
-    for invoice in invoices:
+    for invoice in invoices_by_inv_number:
         if invoice.submitted_on is None:
             due_date = "N/A"
             payout_due_date_relative = " "
