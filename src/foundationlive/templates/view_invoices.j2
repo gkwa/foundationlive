@@ -7,7 +7,7 @@ inv submittal due in:  {% if invoice.submitted_on -%}
 N/A
 {%- else -%}
   {%- if invoice.submittal_due_from_now_delta.days != 0 -%}
-    {{ invoice.submittal_due_from_now_delta.days }} days on {{ invoice.submittal_due_date.strftime("%m-%d") }}
+    {{ invoice.submittal_due_from_now_delta.days }} {% if invoice.submittal_due_from_now_delta.days > 1 %}days{% else %}day{% endif %} on {{ invoice.submittal_due_date.strftime("%m-%d") }}
   {%- else -%}
     today ({{ invoice.submittal_due_date.strftime("%m-%d") }})
   {% endif %}
