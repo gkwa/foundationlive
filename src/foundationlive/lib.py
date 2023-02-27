@@ -55,11 +55,9 @@ def view_hours_per_task(timesheet: model.Timesheet):
         )
         total_time += delta
 
-    total_label = (
-        f"total for invoices {', '.join([str(x) for x in invoices])}"
-        if len(invoices) > 1
-        else f"total for invoice {str(invoices.pop())}"
-    )
+    label_total = f"invoice {str(invoices.pop())} total"
+    if len(invoices) > 1:
+        label_total = f"invoices {', '.join([str(x) for x in invoices])} total"
 
     template = env.get_template("view_hours_worked_per_task.j2")
     out = template.render(
@@ -67,7 +65,7 @@ def view_hours_per_task(timesheet: model.Timesheet):
             "invoices": invoices,
             "stuff": stuff,
             "total_time": timedelta_to_short_string(total_time),
-            "total_label": total_label,
+            "label_total": label_total,
         }
     )
     return out
