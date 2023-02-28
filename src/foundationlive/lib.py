@@ -115,28 +115,26 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
 def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
     daily_entries = []
 
-    total_seconds = 0
+    total_time_worked = datetime.timedelta(seconds=0)
     wage_per_hour = float(os.environ.get("WAGE", 0))
     for day in timesheet.days:
         seconds = 0
         for task in day.tasks.__root__:
             seconds += durations.Duration(task.task_time).to_seconds()
 
-        total_seconds += seconds
-        delta = datetime.timedelta(seconds=seconds)
+        total_time_worked += datetime.timedelta(seconds=seconds)
         x1 = {
             "date": day.date,
-            "worked_duration": timedelta_to_short_string(delta),
+            "worked_duration": timedelta_to_short_string(total_time_worked),
             "invoice_number": day.invoice,
-            "earned": wage_per_hour * delta.seconds / 60 / 60,
+            "earned": wage_per_hour * total_time_worked.seconds / 60 / 60,
         }
         daily_entries.append(x1)
 
     template = env.get_template("view_hours_worked_per_day_summary.j2")
     daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
-    delta = datetime.timedelta(seconds=total_seconds)
 
-    x = delta.total_seconds() / 60 / 60
+    x = total_time_worked.total_seconds() / 60 / 60
     total_time_worked_friendly = (
         "{:d}h".format(int(x)) if int(x) == x else "{0:.2f}h".format(x)
     )
