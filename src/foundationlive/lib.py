@@ -134,9 +134,16 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
     template = env.get_template("view_hours_worked_per_day_summary.j2")
     daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
+    delta = datetime.timedelta(seconds=total_seconds)
+
+    x = delta.total_seconds() / 60 / 60
+    total_time_worked_friendly = (
+        "{:d}h".format(int(x)) if int(x) == x else "{0:.2f}h".format(x)
+    )
+
     out = template.render(
         data={
-            "summary": {"total_seconds_worked": total_seconds},
+            "summary": {"total_time_worked_friendly": total_time_worked_friendly},
             "entries": daily_entries,
         }
     )
