@@ -127,7 +127,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
             "date": day.date,
             "worked_duration": timedelta_to_short_string(total_time_worked),
             "invoice_number": day.invoice,
-            "earned": wage_per_hour * total_time_worked.seconds / 60 / 60,
+            "earned": wage_per_hour * total_time_worked.total_seconds() / 60 / 60,
         }
         daily_entries.append(x1)
 
