@@ -118,7 +118,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
     total_time_worked = datetime.timedelta(seconds=0)
 
-    for day in timesheet.days:
+    for day in sorted(timesheet.days, key=lambda i: i.date, reverse=False):
         seconds = 0
         for task in day.tasks.__root__:
             seconds += durations.Duration(task.task_time).to_seconds()
