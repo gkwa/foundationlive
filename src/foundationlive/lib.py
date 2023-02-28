@@ -126,8 +126,8 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
         total_time_worked += datetime.timedelta(seconds=seconds)
 
         earned = wage_per_hour * total_time_worked.total_seconds() / 60 / 60
-        earned = "${:.2f}".format(earned)
-        earned = "{:>9}".format(earned)
+        earned = "${:,.2f}".format(earned)
+        earned = "{:>10}".format(earned)
 
         x1 = {
             "date": day.date,
