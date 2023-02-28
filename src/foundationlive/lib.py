@@ -25,7 +25,7 @@ local_now = now.astimezone()
 local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
 delta_net30 = datetime.timedelta(days=30)
-wage_per_hour = float(os.environ.get("WAGE", 0.0))
+hourly_rate = float(os.environ.get("HOURLY_RATE", 0.0))
 
 
 @dataclasses.dataclass
@@ -125,7 +125,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
         total_time_worked += datetime.timedelta(seconds=seconds)
 
-        earned = wage_per_hour * total_time_worked.total_seconds() / 60 / 60
+        earned = hourly_rate * total_time_worked.total_seconds() / 60 / 60
         earned = "${:,.2f}".format(earned)
         earned = "{:>10}".format(earned)
 
@@ -134,7 +134,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
             "worked_duration_friendly": timedelta_to_short_string(total_time_worked),
             "invoice_number": day.invoice,
             "earned": earned,
-            "wage_not_zero": wage_per_hour != 0.0,
+            "rate_not_zero": hourly_rate != 0.0,
         }
         daily_entries.append(x1)
 

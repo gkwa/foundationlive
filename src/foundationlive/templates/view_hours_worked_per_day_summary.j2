@@ -1,6 +1,6 @@
 {% for day in data.entries -%}
 {{ day.invoice_number }} {{ day.date.date() }} {{ "%6s"|format(day.worked_duration_friendly) }}
-  {%- if day.wage_not_zero -%}
+  {%- if day.rate_not_zero -%}
     {{ day.earned }}
   {%- endif %}
 {% endfor -%}
