@@ -1,4 +1,7 @@
 {% for day in data.entries -%}
-{{ day.invoice_number }} {{ day.date.date() }} {{ "%5s"|format(day.worked_duration) }} {% if day.earned > 1.0 %}{{ "%7.2f"|format(day.earned) }}{% endif %}
+{{ day.invoice_number }} {{ day.date.date() }} {{ "%6s"|format(day.worked_duration_friendly) }}
+  {%- if day.wage_not_zero -%}
+    {{ day.earned }}
+  {%- endif %}
 {% endfor -%}
 {{ data.summary.total_time_worked_friendly }}
