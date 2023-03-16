@@ -7,6 +7,7 @@ import pathlib
 import textwrap
 
 import durations
+import inflect
 import jinja2
 import pkg_resources
 import timeago
@@ -237,27 +238,22 @@ def view_invoices(timesheet: model.Timesheet):
 
     display_dicts = []
     for invoice in invoices_by_inv_number:
-        if invoice.submitted_on is None:
-            due_date = "N/A"
-            payout_due_date_relative = " "
-            submitted_on = None
-        else:
+        due_date = "N/A"
+        payout_due_relative = " "
+        submitted_on = None
+
+        if invoice.submitted_on is not None:
             due_date = invoice.submitted_on + delta_net30
             delta = due_date - local_now
-            payout_due_date_relative = delta.days
             submitted_on = invoice.submitted_on.date()
             ts = invoice.submitted_on + delta_net30
-            payout_due_date_relative = (
-                f"{payout_due_date_relative} days on {ts.strftime('%m-%d')}"
-            )
+            days = inflect.engine().plural("day", delta.days)
+            date = ts.strftime("%m-%d")
+            payout_due_relative = f"{delta.days} {days} on {date}"
 
         if invoice.paid_on:
             delta = local_now - invoice.paid_on
-            payout_due_date_relative = timeago.format(delta)
-            ts = local_now - delta
-            payout_due_date_relative = (
-                f"{payout_due_date_relative} on {ts.strftime('%m-%d')}"
-            )
+            payout_due_relative = timeago.format(delta)
 
         display = {
             "submitted": invoice.submitted_on is not None,
@@ -266,7 +262,7 @@ def view_invoices(timesheet: model.Timesheet):
             "submittal_due_date": submittal_due_date,
             "paid_already": invoice.paid_on is not None,
             "number": invoice.number,
-            "payout_due_date_relative": payout_due_date_relative,
+            "payout_due_relative": payout_due_relative,
         }
 
         if not invoice.submitted_on:
