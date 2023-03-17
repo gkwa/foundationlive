@@ -2,7 +2,7 @@
 invoice:               {{ invoice.number }}
 paid:                  {{ invoice.paid_already }}
 submitted:             {{ invoice.submitted_on or '' }}
-payout due in:         {{ invoice.payout_due_relative }}
+payout due:            {{ invoice.payout_due_relative }}
 inv submittal due in:  {% if invoice.submitted_on -%}
 N/A
 {%- else -%}
