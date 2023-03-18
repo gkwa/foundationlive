@@ -166,7 +166,7 @@ def main(args):
             lib.view_hours_worked_per_day_summary,
             timesheet_filtered,
         ),
-        lib.Thingy("view_csv.txt", lib.view_csv, timesheet_filtered),
+        lib.Thingy("view_csv.txt", lib.view_csv_jinja2, timesheet_filtered),
         # want timesheet for view_invoices instead of timesheet_filtered
         lib.Thingy("view_invoices.txt", lib.view_invoices, timesheet),
         # FIXME: you're specifying output file here view_csv.csv,

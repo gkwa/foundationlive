@@ -39,7 +39,7 @@ class Thingy:
     data: dict
 
 
-def view_hours_per_task(timesheet: model.Timesheet):
+def view_hours_per_task(timesheet: model.Timesheet) -> str:
     names = {}
     invoices = set()
     for entry in timesheet.days:
@@ -65,7 +65,7 @@ def view_hours_per_task(timesheet: model.Timesheet):
         label_total = f"invoices {', '.join([str(x) for x in invoices])} total"
 
     template = env.get_template("view_hours_worked_per_task.j2")
-    out = template.render(
+    inv_str = template.render(
         data={
             "invoices": invoices,
             "stuff": stuff,
@@ -73,10 +73,10 @@ def view_hours_per_task(timesheet: model.Timesheet):
             "label_total": label_total,
         }
     )
-    return out
+    return inv_str
 
 
-def view_hours_worked_per_day(timesheet: model.Timesheet):
+def view_hours_worked_per_day(timesheet: model.Timesheet) -> str:
     stuff = []
 
     for entry in timesheet.days:
@@ -113,11 +113,10 @@ def view_hours_worked_per_day(timesheet: model.Timesheet):
 
     template = env.get_template("view_hours_worked_per_day.j2")
     stuff = sorted(stuff, key=lambda i: i["date"], reverse=True)
-    out = template.render(data=stuff)
-    return out
+    return template.render(data=stuff)
 
 
-def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
+def view_hours_worked_per_day_summary(timesheet: model.Timesheet) -> str:
     daily_entries = []
 
     total_time_worked = datetime.timedelta(seconds=0)
@@ -154,13 +153,13 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
         "{:d}h".format(int(x)) if int(x) == x else "{0:.2f}h".format(x)
     )
 
-    out = template.render(
+    view_str = template.render(
         data={
             "summary": {"total_time_worked_friendly": total_time_worked_friendly},
             "entries": daily_entries,
         }
     )
-    return out
+    return view_str
 
 
 def timedelta_to_short_string(td: datetime.timedelta) -> str:
@@ -177,7 +176,7 @@ def timedelta_to_short_string(td: datetime.timedelta) -> str:
     return result.strip()
 
 
-def generate_csv_data(timesheet: model.Timesheet):
+def generate_csv_data(timesheet: model.Timesheet) -> list[dict]:
     stuff = []
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
@@ -216,16 +215,7 @@ def generate_csv_data(timesheet: model.Timesheet):
     return tasks
 
 
-def view_csv(timesheet: model.Timesheet):
-    tasks = generate_csv_data(timesheet)
-    template = env.get_template("view_csv.j2")
-    out = template.render(tasks=tasks)
-    return out
-
-
-def view_google_sheets(timesheet: model.Timesheet):
-    tasks = generate_csv_data(timesheet)
-
+def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
     headers = [
         "invoice",
         "day",
@@ -254,21 +244,27 @@ def view_google_sheets(timesheet: model.Timesheet):
         }
         data.append(dct)
 
-    mystr = io.StringIO()
-    writer = csv.DictWriter(mystr, fieldnames=headers)
+    my_stringio = io.StringIO()
+    writer = csv.DictWriter(my_stringio, fieldnames=headers)
     writer.writeheader()
     for row in data:
         writer.writerow(row)
 
-    contents = mystr.getvalue()
-    return mystr
-    csv_path = pathlib.Path("view_csv.csv")
-    csv_path.write_text(contents)
-
-    return csv_path.read_text()  # FIXME: workaround for Thingy nonsense
+    return my_stringio
 
 
-def view_invoices(timesheet: model.Timesheet):
+def view_csv_jinja2(timesheet: model.Timesheet) -> str:
+    tasks = generate_csv_data(timesheet)
+    template = env.get_template("view_csv.j2")
+    return template.render(tasks=tasks)
+
+
+def view_google_sheets(timesheet: model.Timesheet) -> str:
+    tasks = generate_csv_data(timesheet)
+    return view_csv_stringio(tasks).getvalue()
+
+
+def view_invoices(timesheet: model.Timesheet) -> str:
     template = env.get_template("view_invoices.j2")
     invoices = timesheet.invoices.__root__
     invoices_by_inv_number = sorted(invoices, key=lambda x: x.number, reverse=False)
@@ -335,5 +331,4 @@ def view_invoices(timesheet: model.Timesheet):
 
         display_dicts.append(display)
 
-    out = template.render(data=display_dicts)
-    return out
+    return template.render(data=display_dicts)
