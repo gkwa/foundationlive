@@ -30,7 +30,7 @@ import yaml
 
 from foundationlive import __version__, lib
 
-from . import model
+from . import googlesheets, model
 from . import writer as writermod
 
 __author__ = "Taylor Monacelli"
@@ -103,6 +103,12 @@ def parse_args(args):
         action="append",
         help="Remove all task entries that don't match invoice these invoice numbers",
     )
+    parser.add_argument(
+        "--google-sheets",
+        required=False,
+        action="store_true",
+        help="update google sheets",
+    )
     return parser.parse_args(args)
 
 
@@ -163,12 +169,18 @@ def main(args):
         lib.Thingy("view_csv.txt", lib.view_csv, timesheet_filtered),
         # want timesheet for view_invoices instead of timesheet_filtered
         lib.Thingy("view_invoices.txt", lib.view_invoices, timesheet),
+        # FIXME: you're specifying output file here view_csv.csv,
+        # but function you're calling here ignores that.
+        lib.Thingy("view_csv.csv", lib.view_google_sheets, timesheet_filtered),
     ]
 
     for thing in outputs:
         out = thing.fn(thing.data)
         writermod.FileWriter(thing.fname).write(out)
         writermod.ConsoleWriter().write(out)
+
+    if args.google_sheets:
+        googlesheets.main()
 
     _logger.info("Script ends here")
 

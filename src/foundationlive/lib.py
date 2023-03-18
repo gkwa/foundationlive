@@ -1,6 +1,8 @@
 import calendar
+import csv
 import dataclasses
 import datetime
+import io
 import logging
 import os
 import pathlib
@@ -20,6 +22,7 @@ package = __name__.split(".")[0]
 templates_dir = pathlib.Path(pkg_resources.resource_filename(package, "templates"))
 loader = jinja2.FileSystemLoader(searchpath=templates_dir)
 env = jinja2.Environment(loader=loader, keep_trailing_newline=True)
+
 
 now = datetime.datetime.now()
 local_now = now.astimezone()
@@ -174,7 +177,7 @@ def timedelta_to_short_string(td: datetime.timedelta) -> str:
     return result.strip()
 
 
-def view_csv(timesheet: model.Timesheet):
+def generate_csv_data(timesheet: model.Timesheet):
     stuff = []
     for entry in timesheet.days:
         for task in entry.tasks.__root__:
@@ -195,8 +198,6 @@ def view_csv(timesheet: model.Timesheet):
             }
             stuff.append(x1)
 
-    template = env.get_template("view_csv.j2")
-
     tasks = sorted(stuff, key=lambda i: i["date"], reverse=True)
 
     invoice = None
@@ -212,8 +213,59 @@ def view_csv(timesheet: model.Timesheet):
             total_per_invoice / datetime.timedelta(hours=1).total_seconds()
         )
 
+    return tasks
+
+
+def view_csv(timesheet: model.Timesheet):
+    tasks = generate_csv_data(timesheet)
+    template = env.get_template("view_csv.j2")
     out = template.render(tasks=tasks)
     return out
+
+
+def view_google_sheets(timesheet: model.Timesheet):
+    tasks = generate_csv_data(timesheet)
+
+    headers = [
+        "invoice",
+        "day",
+        "date",
+        "task",
+        "duration hours",
+        "duration friendly",
+        "inv total decimal",
+        "inv total friendly",
+    ]
+
+    data = []
+    for task in tasks:
+        task_details_pretty = (
+            f"{task['task']} - {task['minutia']}" if task["minutia"] else task["task"]
+        )
+        dct = {
+            "invoice": task["invoice"],
+            "task": task_details_pretty,
+            "day": task["date"].strftime("%a"),
+            "date": task["date"].date(),
+            "duration hours": task["worked_time"],
+            "duration friendly": task["worked_time_friendly"],
+            "inv total decimal": task["worked_time_cumulative_frac"],
+            "inv total friendly": task["worked_time_cumulative"],
+        }
+        data.append(dct)
+
+    mystr = io.StringIO()
+    writer = csv.DictWriter(mystr, fieldnames=headers)
+    writer.writeheader()
+    for row in data:
+        writer.writerow(row)
+
+    contents = mystr.getvalue()
+    return mystr
+    csv_path = pathlib.Path("view_csv.csv")
+    csv_path.write_text(contents)
+
+    return csv_path.read_text()  # FIXME: workaround for Thingy nonsense
 
 
 def view_invoices(timesheet: model.Timesheet):
