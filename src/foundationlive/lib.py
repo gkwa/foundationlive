@@ -232,21 +232,25 @@ def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
     tasks = copy.deepcopy(tasks)
     headers = collections.OrderedDict(
         {
-            "invoice": "invoice",
-            "day": "day",
             "date": "date",
+            "invoice": "invoice",
+            "inv total": "worked_time_cumulative",
+            "duration": "worked_time_friendly",
             "task": "task_details_pretty",
-            "duration hours": "worked_time",
-            "duration friendly": "worked_time_friendly",
-            "inv total decimal": "worked_time_cumulative_frac",
-            "inv total friendly": "worked_time_cumulative",
         }
     )
 
     data = []
     for task in tasks:
-        task["day"] = task["date"].strftime("%a")
-        task["date"] = task["date"].date()
+        x1 = task["date"].strftime("%a %m-%d")
+        x2 = task["worked_time_friendly"]
+        x3 = task["worked_time"]
+        x4 = task["worked_time_cumulative"]
+        x5 = task["worked_time_cumulative_frac"]
+
+        task["date"] = x1
+        task["worked_time_cumulative"] = f"{x4} ({x5:.2f})"
+        task["worked_time_friendly"] = f"{x2} ({x3:.2f})"
         task["task_details_pretty"] = (
             f"{task['task']} - {task['minutia']}" if task["minutia"] else task["task"]
         )
