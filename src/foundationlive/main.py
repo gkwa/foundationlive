@@ -93,7 +93,7 @@ def parse_args(args):
         const=logging.DEBUG,
     )
     parser.add_argument(
-        "--data-path", default="data.json", required=True, help="path to data.json"
+        "--data-path", default="data.yaml", required=True, help="path to data.yaml"
     )
     parser.add_argument(
         "-i",
