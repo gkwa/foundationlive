@@ -11,6 +11,7 @@ import pathlib
 import textwrap
 
 import durations
+import holidays
 import inflect
 import jinja2
 import pkg_resources
@@ -32,6 +33,23 @@ local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
 delta_net30 = datetime.timedelta(days=30)
 hourly_rate = float(os.environ.get("HOURLY_RATE", 0.0))
+
+
+def get_net30(start_date: datetime.datetime, net30=delta_net30) -> datetime.timedelta:
+    """
+    Given some date start_date, return the timedelta till the non-holiday monday
+    after (start_date + 30 days).
+    """
+    us_holidays = holidays.US(years=start_date.year)
+
+    def is_holiday_or_weekend(date):
+        return date.weekday() >= 5 or date in us_holidays
+
+    next_weekday = start_date + net30
+    while is_holiday_or_weekend(next_weekday):
+        next_weekday += datetime.timedelta(days=1)
+
+    return next_weekday - start_date
 
 
 @dataclasses.dataclass
@@ -292,10 +310,11 @@ def view_invoices(timesheet: model.Timesheet) -> str:
         submitted_on = None
 
         if invoice.submitted_on is not None:
-            due_date = invoice.submitted_on + delta_net30
-            delta = due_date - local_now
+            s = invoice.submitted_on
+            due_date = s + get_net30(s, delta_net30)
+            delta = due_date - local_now + datetime.timedelta(days=1)
             submitted_on = invoice.submitted_on.date()
-            ts = invoice.submitted_on + delta_net30
+            ts = s + get_net30(s, delta_net30)
             days = inflect.engine().plural("day", delta.days)
             date = ts.strftime("%m-%d")
             payout_due_relative = f"in {delta.days} {days} on {date}"
