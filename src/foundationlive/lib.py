@@ -1,4 +1,6 @@
 import calendar
+import collections
+import copy
 import csv
 import dataclasses
 import datetime
@@ -23,7 +25,7 @@ templates_dir = pathlib.Path(pkg_resources.resource_filename(package, "templates
 loader = jinja2.FileSystemLoader(searchpath=templates_dir)
 env = jinja2.Environment(loader=loader, keep_trailing_newline=True)
 
-
+sec_per_hour = datetime.timedelta(hours=1).total_seconds()
 now = datetime.datetime.now()
 local_now = now.astimezone()
 local_tz = local_now.tzinfo
@@ -128,11 +130,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet) -> str:
 
         total_time_worked += datetime.timedelta(seconds=seconds)
 
-        earned = (
-            hourly_rate
-            * total_time_worked.total_seconds()
-            / datetime.timedelta(hours=1).total_seconds()
-        )
+        earned = hourly_rate * total_time_worked.total_seconds() / sec_per_hour
         earned = "${:,.2f}".format(earned)
         earned = "{:>10}".format(earned)
 
@@ -148,7 +146,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet) -> str:
     template = env.get_template("view_hours_worked_per_day_summary.j2")
     daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
 
-    x = total_time_worked.total_seconds() / datetime.timedelta(hours=1).total_seconds()
+    x = total_time_worked.total_seconds() / sec_per_hour
     total_time_worked_friendly = (
         "{:d}h".format(int(x)) if int(x) == x else "{0:.2f}h".format(x)
     )
@@ -164,7 +162,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet) -> str:
 
 def timedelta_to_short_string(td: datetime.timedelta) -> str:
     seconds = td.total_seconds()
-    hours, remainder = divmod(seconds, datetime.timedelta(hours=1).total_seconds())
+    hours, remainder = divmod(seconds, sec_per_hour)
     minutes, seconds = divmod(remainder, 60)
     result = ""
     if hours > 0:
@@ -189,8 +187,7 @@ def generate_csv_data(timesheet: model.Timesheet) -> list[dict]:
             x1 = {
                 "task": task.task,
                 "date": entry.date,
-                "worked_time": duration.to_seconds()
-                / datetime.timedelta(hours=1).total_seconds(),
+                "worked_time": duration.to_seconds() / sec_per_hour,
                 "worked_time_friendly": task.task_time,
                 "invoice": entry.invoice,
                 "minutia": minutia,
@@ -208,44 +205,41 @@ def generate_csv_data(timesheet: model.Timesheet) -> list[dict]:
         total_per_invoice += duration.to_seconds()
         delta = datetime.timedelta(seconds=total_per_invoice)
         task["worked_time_cumulative"] = timedelta_to_short_string(delta)
-        task["worked_time_cumulative_frac"] = (
-            total_per_invoice / datetime.timedelta(hours=1).total_seconds()
-        )
+        task["worked_time_cumulative_frac"] = total_per_invoice / sec_per_hour
 
     return tasks
 
 
 def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
-    headers = [
-        "invoice",
-        "day",
-        "date",
-        "task",
-        "duration hours",
-        "duration friendly",
-        "inv total decimal",
-        "inv total friendly",
-    ]
+    tasks = copy.deepcopy(tasks)
+    headers = collections.OrderedDict(
+        {
+            "invoice": "invoice",
+            "day": "day",
+            "date": "date",
+            "task": "task_details_pretty",
+            "duration hours": "worked_time",
+            "duration friendly": "worked_time_friendly",
+            "inv total decimal": "worked_time_cumulative_frac",
+            "inv total friendly": "worked_time_cumulative",
+        }
+    )
 
     data = []
     for task in tasks:
-        task_details_pretty = (
+        task["day"] = task["date"].strftime("%a")
+        task["date"] = task["date"].date()
+        task["task_details_pretty"] = (
             f"{task['task']} - {task['minutia']}" if task["minutia"] else task["task"]
         )
-        dct = {
-            "invoice": task["invoice"],
-            "task": task_details_pretty,
-            "day": task["date"].strftime("%a"),
-            "date": task["date"].date(),
-            "duration hours": task["worked_time"],
-            "duration friendly": task["worked_time_friendly"],
-            "inv total decimal": task["worked_time_cumulative_frac"],
-            "inv total friendly": task["worked_time_cumulative"],
-        }
+        dct = {}
+        for header, key in headers.items():
+            dct[header] = task[key]
+
         data.append(dct)
 
     my_stringio = io.StringIO()
-    writer = csv.DictWriter(my_stringio, fieldnames=headers)
+    writer = csv.DictWriter(my_stringio, fieldnames=headers.keys())
     writer.writeheader()
     for row in data:
         writer.writerow(row)
