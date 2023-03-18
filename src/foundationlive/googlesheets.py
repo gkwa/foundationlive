@@ -1,14 +1,22 @@
 import csv
+import os
 import pathlib
 
 import gspread
 import gspread.exceptions
 import oauth2client.service_account
 
-creds_fname = "foundationlive-381012-3f86434e1aa2.json"
-workbook_name = "Copy of streambox / taylor / timesheet"
-csv_path = pathlib.Path("/Users/mtm/pdev/taylormonacelli/foundationlive/view_csv.csv")
 
+def get_var(keyname: str):
+    value = os.getenv(keyname, None)
+    if not value:
+        raise ValueError(keyname)
+    return value
+
+
+workbook_name = get_var("FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME")
+creds_fname = get_var("FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILENAME")
+csv_path = pathlib.Path("view_csv.csv")
 creds_path = pathlib.Path(creds_fname)
 
 
