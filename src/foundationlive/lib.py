@@ -126,7 +126,11 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
         total_time_worked += datetime.timedelta(seconds=seconds)
 
-        earned = hourly_rate * total_time_worked.total_seconds() / 60 / 60
+        earned = (
+            hourly_rate
+            * total_time_worked.total_seconds()
+            / datetime.timedelta(hours=1).total_seconds()
+        )
         earned = "${:,.2f}".format(earned)
         earned = "{:>10}".format(earned)
 
@@ -142,7 +146,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
     template = env.get_template("view_hours_worked_per_day_summary.j2")
     daily_entries = sorted(daily_entries, key=lambda i: i["date"], reverse=True)
 
-    x = total_time_worked.total_seconds() / 60 / 60
+    x = total_time_worked.total_seconds() / datetime.timedelta(hours=1).total_seconds()
     total_time_worked_friendly = (
         "{:d}h".format(int(x)) if int(x) == x else "{0:.2f}h".format(x)
     )
@@ -158,7 +162,7 @@ def view_hours_worked_per_day_summary(timesheet: model.Timesheet):
 
 def timedelta_to_short_string(td: datetime.timedelta) -> str:
     seconds = td.total_seconds()
-    hours, remainder = divmod(seconds, 3600)
+    hours, remainder = divmod(seconds, datetime.timedelta(hours=1).total_seconds())
     minutes, seconds = divmod(remainder, 60)
     result = ""
     if hours > 0:
@@ -183,7 +187,8 @@ def view_csv(timesheet: model.Timesheet):
             x1 = {
                 "task": task.task,
                 "date": entry.date,
-                "worked_time": duration.to_seconds() / 60 / 60,
+                "worked_time": duration.to_seconds()
+                / datetime.timedelta(hours=1).total_seconds(),
                 "worked_time_friendly": task.task_time,
                 "invoice": entry.invoice,
                 "minutia": minutia,
@@ -203,7 +208,9 @@ def view_csv(timesheet: model.Timesheet):
         total_per_invoice += duration.to_seconds()
         delta = datetime.timedelta(seconds=total_per_invoice)
         task["worked_time_cumulative"] = timedelta_to_short_string(delta)
-        task["worked_time_cumulative_frac"] = total_per_invoice / 60 / 60
+        task["worked_time_cumulative_frac"] = (
+            total_per_invoice / datetime.timedelta(hours=1).total_seconds()
+        )
 
     out = template.render(tasks=tasks)
     return out
