@@ -24,6 +24,7 @@ import argparse
 import copy
 import logging
 import pathlib
+import platform
 import sys
 
 import yaml
@@ -31,7 +32,7 @@ import yaml
 from foundationlive import __version__, lib
 
 from . import config as configmod
-from . import googlesheets, menu, model
+from . import googlesheets, model
 from . import writer as writermod
 
 __author__ = "Taylor Monacelli"
@@ -39,6 +40,11 @@ __copyright__ = "Taylor Monacelli"
 __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
+
+try:
+    import menu
+except (NotImplementedError, ModuleNotFoundError):
+    _logger.debug("simple_term_menu isn't supported on windows")
 
 
 # ---- Python API ----
@@ -105,7 +111,8 @@ def parse_args(args):
         type=check_positive,
         required=False,
         action="append",
-        help="Remove all task entries that don't match invoice these invoice numbers",
+        help="Remove all task entries that don't match invoice "
+        "these invoice numbers (eg, 1, 2 10)",
     )
     parser.add_argument(
         "--google-sheets",
@@ -155,6 +162,9 @@ def main(args):
     setup_logging(args.loglevel)
     _logger.debug("Starting crazy calculations...")
     configmod.init()
+
+    if args.show_config:
+        configmod.show_config()
 
     records_path = pathlib.Path(args.data_path)
     if not records_path.exists():
@@ -210,11 +220,10 @@ def main(args):
         out = lib.view_google_sheets(timesheet_filtered)
         googlesheets.main(out)
 
-    if args.show_config:
-        configmod.show_config()
-
+    windows = platform.system() == "Windows" or platform.system().startswith("CYGWIN")
     if args.show_reports:
-        menu.main()
+        if not windows:
+            menu.main()
 
 
 def run():

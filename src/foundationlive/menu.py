@@ -1,11 +1,15 @@
 import logging
 import pathlib
 
-import simple_term_menu
-
 from . import config as configmod
 
 _logger = logging.getLogger(__name__)
+
+try:
+    import simple_term_menu
+except NotImplementedError:
+    _logger.debug("simple_term_menu isn't supported on windows")
+
 
 base_dir = pathlib.Path(
     configmod.config["FOUNDATIONLIVE_TEMPLATES_OUTPUT_DIRECTORY"]
@@ -23,7 +27,6 @@ lst = [
 
 
 def main():
-
     for file in lst:
         path = base_dir / file
         _logger.debug(f"{path=}")
