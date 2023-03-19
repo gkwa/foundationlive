@@ -6,7 +6,6 @@ import dataclasses
 import datetime
 import io
 import logging
-import os
 import pathlib
 import textwrap
 
@@ -17,6 +16,7 @@ import jinja2
 import pkg_resources
 import timeago
 
+from . import config as configmod
 from . import model
 
 _logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ local_now = now.astimezone()
 local_tz = local_now.tzinfo
 local_tzname = local_tz.tzname(local_now)
 delta_net30 = datetime.timedelta(days=30)
-hourly_rate = float(os.environ.get("HOURLY_RATE", 0.0))
+hourly_rate = float(configmod.config["HOURLY_RATE"]) or 0.0
 
 
 def get_net30(start_date: datetime.datetime, net30=delta_net30) -> datetime.timedelta:

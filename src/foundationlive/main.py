@@ -30,6 +30,7 @@ import yaml
 
 from foundationlive import __version__, lib
 
+from . import config as configmod
 from . import googlesheets, model
 from . import writer as writermod
 
@@ -93,7 +94,10 @@ def parse_args(args):
         const=logging.DEBUG,
     )
     parser.add_argument(
-        "--data-path", default="data.yaml", required=True, help="path to data.yaml"
+        "--data-path",
+        default=configmod.config["FOUNDATIONLIVE_DATA_PATH"],
+        required=False,
+        help="path to data.yaml",
     )
     parser.add_argument(
         "-i",
@@ -109,6 +113,13 @@ def parse_args(args):
         action="store_true",
         help="update google sheets",
     )
+    parser.add_argument(
+        "--show-config",
+        required=False,
+        action="store_true",
+        help="display details of how this app is configured",
+    )
+
     return parser.parse_args(args)
 
 
@@ -137,6 +148,8 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting crazy calculations...")
+    configmod.init()
+
     records_path = pathlib.Path(args.data_path)
     with open(records_path, "r") as stream:
         try:
@@ -169,20 +182,24 @@ def main(args):
         lib.Thingy("view_csv.txt", lib.view_csv_jinja2, timesheet_filtered),
         # want timesheet for view_invoices instead of timesheet_filtered
         lib.Thingy("view_invoices.txt", lib.view_invoices, timesheet),
-        # FIXME: you're specifying output file here view_csv.csv,
-        # but function you're calling here ignores that.
-        lib.Thingy("view_csv.csv", lib.view_google_sheets, timesheet_filtered),
     ]
+
+    reports_output_dir = pathlib.Path(
+        configmod.config["FOUNDATIONLIVE_TEMPLATES_OUTPUT_DIRECTORY"]
+    ).expanduser()
 
     for thing in outputs:
         out = thing.fn(thing.data)
-        writermod.FileWriter(thing.fname).write(out)
-        writermod.ConsoleWriter().write(out)
+        out_path = reports_output_dir / thing.fname
+        writermod.FileWriter(out_path).write(out)
+    #        writermod.ConsoleWriter().write(out)
 
     if args.google_sheets:
-        googlesheets.main()
+        out = lib.view_google_sheets(timesheet_filtered)
+        googlesheets.main(out)
 
-    _logger.info("Script ends here")
+    if args.show_config:
+        configmod.show_config()
 
 
 def run():

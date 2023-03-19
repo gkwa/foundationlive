@@ -1,28 +1,19 @@
 import csv
-import os
 import pathlib
 
 import gspread
 import gspread.exceptions
 import oauth2client.service_account
 
+from . import config as configmod
 
-def get_var(keyname: str):
-    value = os.getenv(keyname, None)
-    if not value:
-        raise ValueError(keyname)
-    return value
-
-
-workbook_name = get_var("FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME")
-creds_fname = get_var("FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILENAME")
-csv_path = pathlib.Path("view_csv.csv")
-creds_path = pathlib.Path(creds_fname)
+workbook_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME"]
+credentials_path = pathlib.Path(
+    pathlib.Path(configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH"])
+)
 
 
-def main():
-    credentials_path = creds_path
-
+def main(csv_file):
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive",
@@ -40,7 +31,7 @@ def main():
     workbook.values_update(
         sheet_title,
         params={"valueInputOption": "USER_ENTERED"},
-        body={"values": list(csv.reader(open(csv_path)))},
+        body={"values": list(csv.reader(csv_file.splitlines()))},
     )
 
 
