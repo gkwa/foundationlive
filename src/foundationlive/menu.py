@@ -29,14 +29,16 @@ def main():
         _logger.debug(f"{path=}")
 
         if not path.exists():
-            lst.remove(file)
+            lst.remove(path)
 
     options = lst
     terminal_menu = simple_term_menu.TerminalMenu(options)
     menu_entry_index = terminal_menu.show()
+    _logger.debug(f"{menu_entry_index=}")
 
-    if menu_entry_index:
+    if menu_entry_index is not None:
         selected = base_dir / options[menu_entry_index]
+        _logger.debug(f"{selected=}")
         print(selected.read_text())
 
 
