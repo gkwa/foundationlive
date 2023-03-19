@@ -33,7 +33,7 @@ def get_file_checksum(path: pathlib.Path) -> str:
     return checksum
 
 
-def no_change(data: str):
+def no_change(data: str) -> bool:
     if not last_run_csv_path.exists():
         return False
 

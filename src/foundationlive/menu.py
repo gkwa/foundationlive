@@ -23,7 +23,6 @@ lst = [
 
 
 def main():
-
     for file in lst:
         path = base_dir / file
         _logger.debug(f"{path=}")
