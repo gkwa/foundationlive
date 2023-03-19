@@ -242,7 +242,7 @@ def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
 
     data = []
     for task in tasks:
-        x1 = task["date"].strftime("%a %m-%d")
+        x1 = task["date"].strftime("%a %m-%d-%y")
         x2 = task["worked_time_friendly"]
         x3 = task["worked_time"]
         x4 = task["worked_time_cumulative"]
