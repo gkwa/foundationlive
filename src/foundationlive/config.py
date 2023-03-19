@@ -15,11 +15,13 @@ appauthor = "taylor"
 user_data_path = pathlib.Path(platformdirs.user_data_dir(appname, appauthor))
 env_path = user_data_path / ".env"
 
-template_str = """
-FOUNDATIONLIVE_TEMPLATES_OUTPUT_DIRECTORY=~/Library/Application Support/foundationlive/
-FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH=~/Library/Application Support/foundationlive/foundationlive-381012-3f86434e1aa2.json
+sheets_auth_json_path = user_data_path / "foundationlive-381012-3f86434e1aa2.json"
+
+template_str = f"""
+FOUNDATIONLIVE_TEMPLATES_OUTPUT_DIRECTORY={user_data_path}
+FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH={sheets_auth_json_path}
 FOUNDATIONLIVE_DATA_PATH=~/Documents/time_data.yaml
-FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME=Copy of streambox / taylor / timesheet
+FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME=where does my time go
 HOURLY_RATE=100.00
 """.strip()  # noqa: E501
 

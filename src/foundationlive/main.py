@@ -151,6 +151,11 @@ def main(args):
     configmod.init()
 
     records_path = pathlib.Path(args.data_path)
+    if not records_path.exists():
+        msg = f"{records_path} is missing"
+        _logger.critical(msg)
+        sys.exit(-1)
+
     with open(records_path, "r") as stream:
         try:
             external_data = yaml.safe_load(stream)
@@ -191,6 +196,7 @@ def main(args):
     for thing in outputs:
         out = thing.fn(thing.data)
         out_path = reports_output_dir / thing.fname
+        _logger.debug(f"writing {out_path}")
         writermod.FileWriter(out_path).write(out)
     #        writermod.ConsoleWriter().write(out)
 
