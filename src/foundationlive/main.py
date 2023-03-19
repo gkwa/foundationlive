@@ -24,7 +24,6 @@ import argparse
 import copy
 import logging
 import pathlib
-import platform
 import sys
 
 import yaml
@@ -215,9 +214,11 @@ def main(args):
         out = lib.view_google_sheets(timesheet_filtered)
         googlesheets.main(out)
 
-    windows = platform.system() == "Windows" or platform.system().startswith("CYGWIN")
-    if args.show_reports and not windows:
-        menu.main()
+    if args.show_reports:
+        try:
+            menu.main()
+        except NotImplementedError:
+            _logger.debug("simple_term_menu isn't supported on windows")
 
 
 def run():
