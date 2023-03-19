@@ -22,10 +22,10 @@ last_run_csv_path = data_dir / "cached_last_run.csv"
 
 
 def get_file_checksum(path: pathlib.Path) -> str:
+    checksum = ""
     if not path.exists():
-        return ""
+        return checksum
 
-    checksum = None
     with open(path, "rb") as f:
         bytes = f.read()  # read entire file as bytes
         checksum = hashlib.sha256(bytes).hexdigest()
