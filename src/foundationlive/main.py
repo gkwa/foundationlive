@@ -24,6 +24,7 @@ import argparse
 import copy
 import logging
 import pathlib
+import platform
 import sys
 
 import yaml
@@ -31,7 +32,7 @@ import yaml
 from foundationlive import __version__, lib
 
 from . import config as configmod
-from . import googlesheets, menu, model
+from . import googlesheets, model
 from . import writer as writermod
 
 __author__ = "Taylor Monacelli"
@@ -39,6 +40,12 @@ __copyright__ = "Taylor Monacelli"
 __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
+
+
+try:
+    from . import menu
+except NotImplementedError:
+    _logger.debug("simple_term_menu isn't supported on windows")
 
 
 # ---- Python API ----
@@ -214,11 +221,9 @@ def main(args):
         out = lib.view_google_sheets(timesheet_filtered)
         googlesheets.main(out)
 
-    if args.show_reports:
-        try:
-            menu.main()
-        except NotImplementedError:
-            _logger.debug("simple_term_menu isn't supported on windows")
+    windows = platform.system() == "Windows" or platform.system().startswith("CYGWIN")
+    if args.show_reports and not windows:
+        menu.main()
 
 
 def run():
