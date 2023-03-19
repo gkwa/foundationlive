@@ -31,7 +31,7 @@ import yaml
 from foundationlive import __version__, lib
 
 from . import config as configmod
-from . import googlesheets, model
+from . import googlesheets, menu, model
 from . import writer as writermod
 
 __author__ = "Taylor Monacelli"
@@ -119,7 +119,13 @@ def parse_args(args):
         action="store_true",
         help="display details of how this app is configured",
     )
-
+    parser.add_argument(
+        "-r",
+        "--show-reports",
+        required=False,
+        action="store_true",
+        help="display reports",
+    )
     return parser.parse_args(args)
 
 
@@ -206,6 +212,9 @@ def main(args):
 
     if args.show_config:
         configmod.show_config()
+
+    if args.show_reports:
+        menu.main()
 
 
 def run():

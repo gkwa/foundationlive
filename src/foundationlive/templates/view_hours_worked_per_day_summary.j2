@@ -1,7 +1,7 @@
-{% for day in data.entries -%}
-{{ day.invoice_number }} {{ day.date.date() }} {{ "%6s"|format(day.worked_duration_friendly) }}
+{% for day in data.entries | reverse -%}
+{{ day.invoice_number }} {{ day.date.date() }} {{ "%9s"|format(day.worked_duration_friendly) }}
   {%- if day.rate_not_zero -%}
-    {{ day.earned }}
+    {{ "%11s"|format(day.earned) }}
   {%- endif %}
 {% endfor -%}
 {{ data.summary.total_time_worked_friendly }}
