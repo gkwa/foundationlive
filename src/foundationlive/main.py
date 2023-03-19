@@ -43,7 +43,7 @@ _logger = logging.getLogger(__name__)
 
 try:
     import menu
-except NotImplementedError:
+except (NotImplementedError, ModuleNotFoundError):
     _logger.debug("simple_term_menu isn't supported on windows")
 
 
