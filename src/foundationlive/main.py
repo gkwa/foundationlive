@@ -42,8 +42,8 @@ __license__ = "MIT"
 _logger = logging.getLogger(__name__)
 
 try:
-    import menu
-except (NotImplementedError, ModuleNotFoundError):
+    from . import menu
+except NotImplementedError:
     _logger.debug("simple_term_menu isn't supported on windows")
 
 
