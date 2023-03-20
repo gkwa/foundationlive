@@ -236,8 +236,8 @@ def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
         {
             "date": "date",
             "invoice": "invoice",
-            "inv total": "worked_time_cumulative",
-            "duration": "worked_time_friendly",
+            "invoice total": "worked_time_cumulative",
+            "task duration": "worked_time_friendly",
             "task": "task_details_pretty",
         }
     )
