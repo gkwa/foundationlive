@@ -230,6 +230,8 @@ def generate_csv_data(timesheet: model.Timesheet) -> list[dict]:
 
 def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
     tasks = copy.deepcopy(tasks)
+    tasks = sorted(tasks, key=lambda task: task["date"], reverse=False)
+
     headers = collections.OrderedDict(
         {
             "date": "date",
