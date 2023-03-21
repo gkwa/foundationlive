@@ -12,7 +12,7 @@ from . import config as configmod
 
 _logger = logging.getLogger(__name__)
 
-workbook_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_WORKBOOK_NAME"]
+spreadsheet_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_SPREADSHEET_NAME"]
 credentials_path = pathlib.Path(
     pathlib.Path(configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH"])
 )
@@ -71,16 +71,18 @@ def main(csv_file):
         )
     )
     client = gspread.authorize(creds)
-    workbook = client.open(workbook_name)
-    sheet_title = "sheet1"
+    spreadsheet = client.open(spreadsheet_name)
+    worksheet_title = "Sheet1"
+    sheet = spreadsheet.worksheet(worksheet_title)
+    sheet.clear()
 
     if no_change(csv_file):
         msg = "skipping update googlge docs because " "last run is same as current run "
         _logger.debug(msg)
         return
 
-    workbook.values_update(
-        sheet_title,
+    spreadsheet.values_update(
+        worksheet_title,
         params={"valueInputOption": "USER_ENTERED"},
         body={"values": list(csv.reader(csv_file.splitlines()))},
     )
