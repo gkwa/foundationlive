@@ -1,4 +1,4 @@
 {% for item in data.stuff -%}
 {{ "%8s"|format(item.duration_friendly) }} - {{ item.name }}
 {% endfor -%}
-{{ "%9s"|format(data.total_time) }} - {{ data.label_total }}
+{{ "%8s"|format(data.total_time) }} - {{ data.label_total }}

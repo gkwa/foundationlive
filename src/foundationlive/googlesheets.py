@@ -2,6 +2,7 @@ import csv
 import hashlib
 import logging
 import pathlib
+import sys
 import tempfile
 
 import gspread
@@ -12,10 +13,18 @@ from . import config as configmod
 
 _logger = logging.getLogger(__name__)
 
-spreadsheet_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_SPREADSHEET_NAME"]
-credentials_path = pathlib.Path(
-    pathlib.Path(configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH"])
-)
+try:
+    spreadsheet_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_SPREADSHEET_NAME"]
+    worksheet_name = configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_WORKSHEET_NAME"]
+    credentials_path = pathlib.Path(
+        pathlib.Path(
+            configmod.config["FOUNDATIONLIVE_GOOGLESHEETS_AUTH_JSON_FILE_PATH"]
+        )
+    )
+except KeyError as ex:
+    msg = f"you're missing {ex} from {configmod.env_path}"
+    _logger.critical(msg)
+    sys.exit(-1)
 
 data_dir = credentials_path.parent
 last_run_csv_path = data_dir / "cached_last_run.csv"
@@ -72,17 +81,16 @@ def main(csv_file):
     )
     client = gspread.authorize(creds)
     spreadsheet = client.open(spreadsheet_name)
-    worksheet_title = "Sheet1"
-    sheet = spreadsheet.worksheet(worksheet_title)
+    sheet = spreadsheet.worksheet(worksheet_name)
     sheet.clear()
 
     if no_change(csv_file):
-        msg = "skipping update googlge docs because " "last run is same as current run "
+        msg = "skipping update googlge docs because last run is same as current run "
         _logger.debug(msg)
         return
 
     spreadsheet.values_update(
-        worksheet_title,
+        worksheet_name,
         params={"valueInputOption": "USER_ENTERED"},
         body={"values": list(csv.reader(csv_file.splitlines()))},
     )
