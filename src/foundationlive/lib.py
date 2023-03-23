@@ -236,6 +236,7 @@ def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
             "invoice": "invoice",
             "invoice total": "worked_time_cumulative",
             "task duration": "worked_time_friendly",
+            "task duration decimal": "worked_time",
             "task": "task_details_pretty",
         }
     )
@@ -250,7 +251,8 @@ def view_csv_stringio(tasks: list[dict]) -> io.StringIO:
 
         task["date"] = x1
         task["worked_time_cumulative"] = f"{x4} ({x5:.2f})"
-        task["worked_time_friendly"] = f"{x2} ({x3:.2f})"
+        task["worked_time_friendly"] = x2
+        task["task duration_decimal"] = x3
         task["task_details_pretty"] = (
             f"{task['task']} - {task['minutia']}" if task["minutia"] else task["task"]
         )

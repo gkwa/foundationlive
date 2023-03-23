@@ -86,7 +86,7 @@ def main(csv_file):
 
     if no_change(csv_file):
         msg = "skipping update googlge docs because last run is same as current run "
-        _logger.debug(msg)
+        _logger.info(msg)
         return
 
     spreadsheet.values_update(
