@@ -332,6 +332,9 @@ def view_invoices(timesheet: model.Timesheet) -> str:
             delta = local_now - invoice.paid_on
             payout_due_relative = timeago.format(delta)
 
+        if delta.total_seconds() < 0:
+            payout_due_relative = f"{abs(delta.days)} days ago on {date}"
+
         display = {
             "submitted": invoice.submitted_on is not None,
             "submitted_on": submitted_on,
