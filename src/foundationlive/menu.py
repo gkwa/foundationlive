@@ -17,11 +17,11 @@ base_dir = pathlib.Path(
 _logger.debug(f"{base_dir=}")
 
 lst = [
+    "view_invoices.txt",
     "view_csv.txt",
     "view_hours_per_task.txt",
     "view_hours_worked_per_day.txt",
     "view_hours_worked_per_day_summary.txt",
-    "view_invoices.txt",
 ]
 
 
