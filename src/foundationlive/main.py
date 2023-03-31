@@ -197,6 +197,11 @@ def main(args):
             timesheet_filtered,
         ),
         lib.Thingy(
+            "view_hours_worked_per_day.txt",
+            lib.view_hours_worked_per_day,
+            timesheet_filtered,
+        ),
+        lib.Thingy(
             "view_hours_worked_per_day_summary.txt",
             lib.view_hours_worked_per_day_summary,
             timesheet_filtered,

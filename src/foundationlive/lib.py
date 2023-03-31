@@ -131,7 +131,7 @@ def view_hours_worked_per_day(timesheet: model.Timesheet) -> str:
         }
         stuff.append(x1)
 
-    template = env.get_template("view_hours_worked_per_day.j2")
+    template = env.get_template("view_hours_worked_per_day.html")
     stuff = sorted(stuff, key=lambda i: i["date"], reverse=False)
     return template.render(data=stuff)
 
