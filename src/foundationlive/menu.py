@@ -8,7 +8,8 @@ _logger = logging.getLogger(__name__)
 try:
     import simple_term_menu
 except NotImplementedError:
-    _logger.debug("simple_term_menu isn't supported on windows")
+    msg = "simple_term_menu isn't supported on windows"
+    _logger.debug(msg)
 
 base_dir = pathlib.Path(
     configmod.config["FOUNDATIONLIVE_TEMPLATES_OUTPUT_DIRECTORY"]
