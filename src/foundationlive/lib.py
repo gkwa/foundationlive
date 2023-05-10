@@ -320,9 +320,8 @@ def view_invoices(timesheet: model.Timesheet) -> str:
             due_date = s + get_net30(s, delta_net30)
             delta = due_date - local_now + datetime.timedelta(days=1)
             submitted_on = invoice.submitted_on.date()
-            ts = s + get_net30(s, delta_net30)
             days = inflect.engine().plural("day", delta.days)
-            date = ts.strftime("%m-%d")
+            date = due_date.strftime("%m-%d")
             payout_due_relative = f"in {delta.days} {days} on {date}"
 
             if delta.days == 0:
