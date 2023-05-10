@@ -318,6 +318,9 @@ def view_invoices(timesheet: model.Timesheet) -> str:
         if invoice.submitted_on is not None:
             s = invoice.submitted_on
             due_date = s + get_net30(s, delta_net30)
+            _logger.debug(f"{invoice=}")
+            if invoice.payout_extension_date:
+                due_date = invoice.payout_extension_date
             delta = due_date - local_now + datetime.timedelta(days=1)
             submitted_on = invoice.submitted_on.date()
             days = inflect.engine().plural("day", delta.days)
