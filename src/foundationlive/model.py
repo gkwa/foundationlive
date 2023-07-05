@@ -22,6 +22,7 @@ def date_str_to_datetime(date: str) -> datetime.datetime:
 
 class Invoice(pydantic.BaseModel):
     number: int
+    override_payout_due_date: typing.Optional[datetime.datetime] = None
     submitted_on: typing.Optional[datetime.datetime] = None
     payout_extension_date: typing.Optional[datetime.datetime] = None
     paid_on: typing.Optional[datetime.datetime] = None
@@ -38,6 +39,10 @@ class Invoice(pydantic.BaseModel):
 
     _normalize_payout_extension_date = pydantic.validator(
         "payout_extension_date", pre=True, allow_reuse=True
+    )(date_str_to_datetime)
+
+    _normalize_override_payout_due_date = pydantic.validator(
+        "override_payout_due_date", pre=True, allow_reuse=True
     )(date_str_to_datetime)
 
 

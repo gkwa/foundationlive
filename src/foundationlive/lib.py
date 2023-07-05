@@ -317,7 +317,11 @@ def view_invoices(timesheet: model.Timesheet) -> str:
 
         if invoice.submitted_on is not None:
             s = invoice.submitted_on
-            due_date = s + get_net30(s, delta_net30)
+            due_date = (
+                invoice.override_payout_due_date
+                if invoice.override_payout_due_date
+                else s + get_net30(s, delta_net30)
+            )
             _logger.debug(f"{invoice=}")
             if invoice.payout_extension_date:
                 due_date = invoice.payout_extension_date
